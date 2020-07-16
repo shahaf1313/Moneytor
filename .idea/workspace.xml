@@ -12,9 +12,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fc38cb18-fdcc-4031-aec0-7a788a4bd033" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/Moneytor.exe" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/Moneytor.exe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/main.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.h" beforeDir="false" afterPath="$PROJECT_DIR$/main.h" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -34,6 +35,13 @@
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="nodejs_package_manager_path" value="npm" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -65,7 +73,7 @@
       <option name="presentableId" value="Default" />
       <updated>1594903748359</updated>
       <workItem from="1594903750351" duration="713000" />
-      <workItem from="1594908632996" duration="1343000" />
+      <workItem from="1594908632996" duration="4353000" />
     </task>
     <servers />
   </component>
@@ -88,6 +96,8 @@
       <configuration name="CMakeRunConfiguration">
         <watch expression="ms/1000" language="ObjectiveC" />
         <watch expression="CLOCKS_PER_SEC" language="ObjectiveC" />
+        <watch expression="pDirent-&gt;d_name" language="ObjectiveC" />
+        <watch expression="pDirent-&gt;d_type" language="ObjectiveC" />
       </configuration>
     </watches-manager>
   </component>

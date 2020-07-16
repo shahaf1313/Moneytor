@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <dirent.h>
 #define SLEEP_TIME_SEC 10
 
 /* This function makes a delay of ms milliseconds */
