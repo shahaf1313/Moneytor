@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/cygdrive/c/Users/Shahaf/CLionProjects/Moneytor/main.c
+main.h
+/cygdrive/c/Users/Shahaf/CLionProjects/Moneytor/main.h
+
+/cygdrive/c/Users/Shahaf/CLionProjects/Moneytor/main.h
+stdio.h
+-
+time.h
+-
+
