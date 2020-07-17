@@ -13,7 +13,6 @@
   <component name="ChangeListManager">
     <list default="true" id="fc38cb18-fdcc-4031-aec0-7a788a4bd033" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/Moneytor.exe" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/Moneytor.exe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/main.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.h" beforeDir="false" afterPath="$PROJECT_DIR$/main.h" afterDir="false" />
     </list>
@@ -73,7 +72,7 @@
       <option name="presentableId" value="Default" />
       <updated>1594903748359</updated>
       <workItem from="1594903750351" duration="713000" />
-      <workItem from="1594908632996" duration="10191000" />
+      <workItem from="1594908632996" duration="11688000" />
     </task>
     <servers />
   </component>
@@ -96,7 +95,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/main.c</url>
-          <line>56</line>
+          <line>78</line>
           <option name="timeStamp" value="15" />
         </line-breakpoint>
       </breakpoints>

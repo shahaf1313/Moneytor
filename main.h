@@ -10,6 +10,9 @@
 #define MAX_PATH_LENGTH 256
 
 /* This function makes a delay of ms milliseconds */
-void delay(int ms);
+void delay(unsigned int ms);
+
+/* This function receives an entry in a folder and returns it's type */
+static char* getEntryType(struct dirent *pd);
 
 #endif //MONEYTOR_MAIN_H
