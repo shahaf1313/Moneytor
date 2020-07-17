@@ -73,7 +73,7 @@
       <option name="presentableId" value="Default" />
       <updated>1594903748359</updated>
       <workItem from="1594903750351" duration="713000" />
-      <workItem from="1594908632996" duration="4353000" />
+      <workItem from="1594908632996" duration="10191000" />
     </task>
     <servers />
   </component>
@@ -92,13 +92,14 @@
     </option>
   </component>
   <component name="XDebuggerManager">
-    <watches-manager>
-      <configuration name="CMakeRunConfiguration">
-        <watch expression="ms/1000" language="ObjectiveC" />
-        <watch expression="CLOCKS_PER_SEC" language="ObjectiveC" />
-        <watch expression="pDirent-&gt;d_name" language="ObjectiveC" />
-        <watch expression="pDirent-&gt;d_type" language="ObjectiveC" />
-      </configuration>
-    </watches-manager>
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/main.c</url>
+          <line>56</line>
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

@@ -10,13 +10,20 @@ void delay(int ms)
 
 int main() {
     int i = 0;
+    struct stat status;
     struct dirent *pDirent = NULL;
-    char* folderPath  = "C:\\Users\\Shahaf\\Desktop\\MoneyFolder";
-    DIR* pDir = opendir(folderPath);
+    timestruc_t lastChanged;
+    char path[MAX_PATH_LENGTH], *pFileType, *pFolderPath  = "C:\\Users\\Shahaf\\Desktop\\MoneyFolder";
+    DIR* pDir = opendir(pFolderPath);
     if (pDir == NULL)
     {
         printf("Could not open specified directory. Usage: Monytor <dir_path>.");
         return -1;
+    }
+    if (chdir(pFolderPath) != 0)
+    {
+        printf("Could not enter specified directory. Set appropriate permissions and try again.");
+        return -2;
     }
 
     while(i <= 3)
@@ -26,18 +33,25 @@ int main() {
         rewinddir(pDir);
         while((pDirent = readdir(pDir)) != NULL)
         {
+            if(stat(pDirent->d_name, &status) == -1)
+            {
+                printf("Could not read status of entry: %s. Please check permitions and try again.", pDirent->d_name);
+                break;
+            }
+            lastChanged = status.st_atim;
             switch (pDirent->d_type)
             {
                 case DT_REG:
-                    printf("[%s], File\n", pDirent->d_name);
+                    pFileType = "File";
                     break;
                 case DT_DIR:
-                    printf("[%s], Directory\n", pDirent->d_name);
+                    pFileType = "Directory";
                     break;
                 default:
-                    printf("[%s], Unknown\n", pDirent->d_name);
+                    pFileType = "Unknown";
                     break;
             }
+            printf("[%s], %s, last changed in %s\n", pDirent->d_name, pFileType,  asctime(gmtime(&lastChanged.tv_sec)));
         }
         delay(SLEEP_TIME_SEC * 1000);
     }
