@@ -1,11 +1,14 @@
 #include "main.h"
-static void listGames(void);
+static volatile int keepRunning = 1;
 
 int main(int argc, char **argv)
 {
     /*Variables declaration:*/
     char *pFolderPath;
     list_t *pCurrFileList = initList(), *pNewFileList = initList();
+
+    /*Attach SIGINT to the termination handler:*/
+    signal(SIGINT, intHandler);
 
     /*Parse arguments form usr and open the folder's path*/
     if(argc != 2)
@@ -32,21 +35,12 @@ int main(int argc, char **argv)
     getFileList(pDir, pCurrFileList);
 
     /*Start guarding the folder :)*/
-    int i = 0;
-    while(i < 10)
+    while(keepRunning)
     {
-        printf("\n====================Iteration %d:====================\n", i);
-        ++i;
+        printf("\n====================...Scanning...====================\n");
 
         /*Read new file list:*/
         getFileList(pDir, pNewFileList);
-
-        /*dbg: print both lists:
-        printf("current list print:\n");
-        printList(pCurrFileList);
-        printf("new list print:\n");
-        printList(pNewFileList);
-        printf("\n");*/
 
         /*Print changes:*/
         findDiffNodes(pCurrFileList, pNewFileList, "Deleted", FALSE);
@@ -66,6 +60,7 @@ int main(int argc, char **argv)
     deleteList(pCurrFileList);
     deleteList(pNewFileList);
     closedir(pDir);
+    printf("\n\nThanks for choosing Moneytor! Seeya again soon :)");
     return 0;
 }
 
@@ -163,43 +158,4 @@ static char* getEntryType(struct dirent *pd)
     return pFileType;
 }
 
-void listGames(void)
-{
-    list_t *l1 = initList(), *l2;
-    printf("printing an empty list:\n");
-    printList(l1);
-
-    addElement(l1, "hakitsy", 5, "Dir");
-    addElement(l1, "mitsy", 6, "File");
-    addElement(l1, "pitsy", 8, "Dir");
-    addElement(l1, "bitsy", 17,"File");
-
-    printf("printing a list with 3 elements:\n");
-    printList(l1);
-
-    printf("printing a copied list:\n");
-    l2 = copyList(l1);
-    printList(l2);
-
-    removeElement(l1, l1->first);
-    printf("printing list after removing first element:\n");
-    printList(l1);
-
-    removeElement(l1, l1->first->next);
-    printf("printing list after removing middle element:\n");
-    printList(l1);
-
-    removeElement(l1, l1->last);
-    printf("printing list after removing last element:\n");
-    printList(l1);
-
-    removeElement(l1, l1->last);
-    printf("printing list after removing only element:\n");
-    printList(l1);
-
-    printf("printing l2 before delete:\n");
-    printList(l2);
-    deleteList(l1);
-    deleteList(l2);
-    printf("deleted successfully l1 and l2!\n");
-}
+void intHandler(int dummy) { keepRunning = 0; }

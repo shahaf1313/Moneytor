@@ -35,6 +35,8 @@ string.h
 -
 stdlib.h
 -
+signal.h
+-
 list.h
 /cygdrive/c/Users/Shahaf/CLionProjects/Moneytor/list.h
 
