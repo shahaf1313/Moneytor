@@ -9,6 +9,9 @@ list_t* initList(void)
     {
         printf("Memory allocation failed. Plase try again after memory has been freed.\n");
     }
+    list->counter = 0;
+    list->first = NULL;
+    list->last = NULL;
     return list;
 }
 
@@ -55,12 +58,13 @@ int removeElement(list_t *list, node_t* pElement)
 
 /* This function adds an entry to the end of the list.
  * on success returns 0, otherwise a another number */
-int addElement(list_t *list, char* name, time_t lastChanged)
+int addElement(list_t *list, char* name, time_t lastChanged, char *fileType)
 {
     node_t *newNode = (node_t*)malloc(sizeof(node_t));
     if(newNode == NULL) { return -1;}
     newNode->lastChanged = lastChanged;
     strcpy(newNode->entryName, name);
+    strcpy(newNode->fileType, fileType);
     if(list->counter == 0)
     {
         list->first = newNode;
@@ -89,7 +93,7 @@ list_t* copyList(list_t *src)
     node_t *srcIt = src->first;
     while(srcIt != NULL)
     {
-        addElement(pNewList, srcIt->entryName, srcIt->lastChanged);
+        addElement(pNewList, srcIt->entryName, srcIt->lastChanged, srcIt->fileType);
         srcIt = srcIt->next;
     }
     return pNewList;
@@ -102,6 +106,7 @@ int deleteList(list_t *list)
     while(list->first != NULL)
     {
         removeElement(list, list->first);
+
     }
     if(list->counter!=0)
     {

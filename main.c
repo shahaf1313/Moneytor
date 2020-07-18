@@ -1,4 +1,167 @@
 #include "main.h"
+static void listGames(void);
+
+int main(int argc, char **argv)
+{
+    /*Variables declaration:*/
+    char *pFolderPath;
+    list_t *pCurrFileList = initList(), *pNewFileList = initList();
+
+    /*Parse arguments form usr and open the folder's path*/
+    if(argc != 2)
+    {
+        printf("Incompatible number of parameters. Usage: Moneytor <folder_path>\n");
+        return -1;
+    }
+    pFolderPath = argv[1];
+    DIR* pDir = opendir(pFolderPath);
+
+    /*Open folder and change working dir:*/
+    if (pDir == NULL)
+    {
+        printf("Could not open specified directory. Usage: Monytor <dir_path>.");
+        return -2;
+    }
+    if (chdir(pFolderPath) != 0)
+    {
+        printf("Could not enter specified directory. Set appropriate permissions and try again.");
+        return -3;
+    }
+
+    /*Initialize file list for the first time:*/
+    getFileList(pDir, pCurrFileList);
+
+    /*Start guarding the folder :)*/
+    int i = 0;
+    while(i < 10)
+    {
+        printf("\n====================Iteration %d:====================\n", i);
+        ++i;
+
+        /*Read new file list:*/
+        getFileList(pDir, pNewFileList);
+
+        /*dbg: print both lists:
+        printf("current list print:\n");
+        printList(pCurrFileList);
+        printf("new list print:\n");
+        printList(pNewFileList);
+        printf("\n");*/
+
+        /*Print changes:*/
+        findDiffNodes(pCurrFileList, pNewFileList, "Deleted", FALSE);
+        findDiffNodes(pNewFileList, pCurrFileList, "Added", FALSE);
+        findDiffNodes(pCurrFileList, pNewFileList, "Updated", TRUE);
+
+        /*Swap lists:*/
+        deleteList(pCurrFileList);
+        pCurrFileList = pNewFileList;
+        pNewFileList = initList();
+
+        /*Wait till next iteration:*/
+        delay(SLEEP_TIME_SEC * 1000);
+    }
+
+    /*Exit properly: close dir, clean memory, etc:*/
+    deleteList(pCurrFileList);
+    deleteList(pNewFileList);
+    closedir(pDir);
+    return 0;
+}
+
+/* This function makes a delay of ms milliseconds */
+void delay(unsigned int ms)
+{
+    unsigned int clocks = CLOCKS_PER_SEC * ms / 1000;
+    clock_t stopTime = clocks + clock();
+    while (stopTime > clock());
+}
+
+/* This function receives pointer to a directory and stores each entry in a string array (future - list) */
+static int getFileList(DIR* pDir, list_t* pFileList)
+{
+    struct stat status;
+    struct dirent *pDirent;
+    time_t lastChanged;
+    char *pFileType;
+    int i = 0;
+    rewinddir(pDir);
+    while((pDirent = readdir(pDir)) != NULL)
+    {
+        /*Check entry's type:*/
+        pFileType = getEntryType(pDirent);
+
+        /*Check entry's last changed time:*/
+        if(stat(pDirent->d_name, &status) == -1)
+        {
+            printf("Could not read status of entry: %s. Please check permitions and try again.", pDirent->d_name);
+            lastChanged = 0;
+        }
+        else
+        {
+            lastChanged = status.st_atim.tv_sec;
+        }
+        addElement(pFileList, pDirent->d_name, lastChanged, pFileType);
+        ++i;
+
+        /*dbg: printf("[%s], %s, last changed in %s\n", pDirent->d_name, pFileType,  asctime(gmtime(&lastChanged)));*/
+    }
+    return i;
+}
+
+/* This function gets two arrays lists of strings and prints all the strings that differ from the first
+ * list to the second, with the strToPrint (Added/Deleted) */
+static void findDiffNodes(list_t *original, list_t *updated, char *strToPrint, int updateCheck)
+{
+    int foundFile;
+    node_t *pOriginalNode = original->first, *pUpdatedNode;
+    while(pOriginalNode != NULL)
+    {
+        foundFile = FALSE;
+        pUpdatedNode = updated->first;
+
+        while(pUpdatedNode != NULL)
+        {
+            if (strcmp(pOriginalNode->entryName, pUpdatedNode->entryName) == 0)
+            {
+                foundFile = TRUE;
+                break;
+            }
+            pUpdatedNode = pUpdatedNode->next;
+        }
+
+        if(!updateCheck && !foundFile)
+        {
+            printf("File %s %s!\n", pOriginalNode->entryName, strToPrint);
+        }
+        else if(updateCheck && foundFile)
+        {
+            if(pOriginalNode->lastChanged - pUpdatedNode->lastChanged != 0)
+                printf("File %s %s!\n", pOriginalNode->entryName, strToPrint);
+        }
+
+        pOriginalNode = pOriginalNode->next;
+    }
+}
+
+/* This function receives an entry in a folder and returns it's type */
+static char* getEntryType(struct dirent *pd)
+{
+    char *pFileType;
+    switch (pd->d_type)
+    {
+        case DT_REG:
+            pFileType = "File";
+            break;
+        case DT_DIR:
+            pFileType = "Directory";
+            break;
+        default:
+            pFileType = "Unknown";
+            break;
+    }
+    return pFileType;
+}
 
 void listGames(void)
 {
@@ -6,10 +169,10 @@ void listGames(void)
     printf("printing an empty list:\n");
     printList(l1);
 
-    addElement(l1, "hakitsy", 5);
-    addElement(l1, "mitsy", 3);
-    addElement(l1, "pitsy", 2);
-    addElement(l1, "bitsy", 4);
+    addElement(l1, "hakitsy", 5, "Dir");
+    addElement(l1, "mitsy", 6, "File");
+    addElement(l1, "pitsy", 8, "Dir");
+    addElement(l1, "bitsy", 17,"File");
 
     printf("printing a list with 3 elements:\n");
     printList(l1);
@@ -39,178 +202,4 @@ void listGames(void)
     deleteList(l1);
     deleteList(l2);
     printf("deleted successfully l1 and l2!\n");
-
-    return;
-}
-
-int main()
-{
-    /*Variables declaration:*/
-    unsigned int i, currNumOfFiles = 0, newNumOfFiles = 0;
-    struct stat status;
-    struct dirent *pDirent;
-    timestruc_t lastChanged;
-    char *pFileType, *pFolderPath  = "C:\\Users\\Shahaf\\Desktop\\MoneyFolder";
-    char *pCurrList[MAX_FILES_NUM], *pNewList[MAX_FILES_NUM];
-    DIR* pDir = opendir(pFolderPath);
-
-    listGames();
-    return 0;
-
-    /*todo: parse arguments form usr and extract the folder's path*/
-    /*===========================================================*/
-
-    /*Allocate memory for the 2 static arrays:*/
-    for(i=0; i<MAX_FILES_NUM; ++i)
-    {
-        pCurrList[i] = (char*)malloc(MAX_PATH_LENGTH * sizeof(char));
-        pNewList[i] = (char*)malloc(MAX_PATH_LENGTH * sizeof(char));
-    }
-    zeroStringArray(pCurrList, MAX_FILES_NUM, MAX_PATH_LENGTH);
-    zeroStringArray(pNewList, MAX_FILES_NUM, MAX_PATH_LENGTH);
-
-    /*Open folder and change working dir:*/
-    if (pDir == NULL)
-    {
-        printf("Could not open specified directory. Usage: Monytor <dir_path>.");
-        return -1;
-    }
-    if (chdir(pFolderPath) != 0)
-    {
-        printf("Could not enter specified directory. Set appropriate permissions and try again.");
-        return -2;
-    }
-
-    /*Initialize file list:*/
-    currNumOfFiles = getFileList(pDir, pCurrList);
-
-    /*Start guarding the folder :)*/
-    i = 0;
-    while(i <= 3)
-    {
-        printf("Iteration %d:\n", i);
-        ++i;
-        rewinddir(pDir);
-        newNumOfFiles = getFileList(pDir, pNewList);
-        findDiffStrings(pCurrList, currNumOfFiles, pNewList, newNumOfFiles, "Deleted");
-        findDiffStrings(pNewList, newNumOfFiles, pCurrList, currNumOfFiles, "Added");
-        zeroStringArray(pCurrList, MAX_FILES_NUM, MAX_PATH_LENGTH);
-        copyStringArr(pCurrList, pNewList, MAX_FILES_NUM);
-        currNumOfFiles = newNumOfFiles;
-
-        /*
-        while((pDirent = readdir(pDir)) != NULL)
-        {
-            Check entry's type:
-            pFileType = getEntryType(pDirent);
-
-            Check entry's last changed time:
-            if(stat(pDirent->d_name, &status) == -1)
-            {
-                printf("Could not read status of entry: %s. Please check permitions and try again.", pDirent->d_name);
-                break;
-            }
-            lastChanged = status.st_atim;
-
-            dbg: print entry's full details:
-            printf("[%s], %s, last changed in %s\n", pDirent->d_name, pFileType,  asctime(gmtime(&lastChanged.tv_sec)));
-
-        }
-        */
-
-        /*Wait till next iteration:*/
-        delay(SLEEP_TIME_SEC * 1000);
-    }
-
-    /*Exit properly: close dir, clean memory, etc:*/
-    for( i=0; i<MAX_FILES_NUM; ++i)
-    {
-        free(pCurrList[i]);
-        free(pNewList[i]);
-    }
-    closedir(pDir);
-    return 0;
-}
-
-/* This function makes a delay of ms milliseconds */
-void delay(unsigned int ms)
-{
-    unsigned int clocks = CLOCKS_PER_SEC * ms / 1000;
-    clock_t stopTime = clocks + clock();
-    while (stopTime > clock());
-}
-
-/* This function receives pointer to a directory and stores each entry in a string array (future - list) */
-static int getFileList(DIR* pDir, char **pFileList)
-{
-    struct dirent *pDirent;
-    int i = 0;
-    rewinddir(pDir);
-    while((pDirent = readdir(pDir)) != NULL)
-    {
-        strcpy(pFileList[i], pDirent->d_name);
-        ++i;
-    }
-    return i;
-}
-
-/* This function gets two arrays (future - lists) of strings and prints all the strings that differ from the first
- * array to the second, with the strToPrint (Added/Deleted) */
-static void findDiffStrings(char **firstArr, int n1, char **secondArr, int n2, char *strToPrint)
-{
-    int foundFile = FALSE, i = 0, j = 0;
-    for (i = 0; i < n1; ++i)
-    {
-        foundFile = FALSE;
-        for (j = 0; j < n2; ++j)
-        {
-            if (strcmp(firstArr[i], secondArr[j]) == 0)
-            {
-                foundFile = TRUE;
-                break;
-            }
-        }
-        if(!foundFile)
-        {
-            printf("File %s %s!\n", firstArr[i], strToPrint);
-        }
-    }
-}
-
-/* This function receives an entry in a folder and returns it's type */
-static char* getEntryType(struct dirent *pd)
-{
-    char *pFileType;
-    switch (pd->d_type)
-    {
-        case DT_REG:
-            pFileType = "File";
-            break;
-        case DT_DIR:
-            pFileType = "Directory";
-            break;
-        default:
-            pFileType = "Unknown";
-            break;
-    }
-    return pFileType;
-}
-
-void copyStringArr(char **dest, char **src, int row)
-{
-    for(int i = 0; i < row; ++i)
-    {
-        strcpy(dest[i], src[i]);
-    }
-}
-
-void zeroStringArray(char **arr, int row, int col)
-{
-    for(int i = 0; i < row; ++i)
-    {
-        for (int j = 0; j < col; ++j)
-        {
-            arr[i][j] = '\0';
-        }
-    }
 }
