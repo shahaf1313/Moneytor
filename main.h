@@ -8,11 +8,14 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include "list.h"
+
 #define SLEEP_TIME_SEC 10
-#define MAX_PATH_LENGTH 256
+#define MAX_PATH_LENGTH 255
+#define MAX_FILES_NUM 30
 #define TRUE 1
 #define FALSE 0
-#define MAX_FILES_NUM 30
+
 
 /* This function makes a delay of ms milliseconds */
 void delay(unsigned int ms);

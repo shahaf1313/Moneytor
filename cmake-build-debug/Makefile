@@ -123,6 +123,33 @@ Moneytor/fast:
 	$(MAKE) -f CMakeFiles/Moneytor.dir/build.make CMakeFiles/Moneytor.dir/build
 .PHONY : Moneytor/fast
 
+list.o: list.c.o
+
+.PHONY : list.o
+
+# target to build an object file
+list.c.o:
+	$(MAKE) -f CMakeFiles/Moneytor.dir/build.make CMakeFiles/Moneytor.dir/list.c.o
+.PHONY : list.c.o
+
+list.i: list.c.i
+
+.PHONY : list.i
+
+# target to preprocess a source file
+list.c.i:
+	$(MAKE) -f CMakeFiles/Moneytor.dir/build.make CMakeFiles/Moneytor.dir/list.c.i
+.PHONY : list.c.i
+
+list.s: list.c.s
+
+.PHONY : list.s
+
+# target to generate assembly for a file
+list.c.s:
+	$(MAKE) -f CMakeFiles/Moneytor.dir/build.make CMakeFiles/Moneytor.dir/list.c.s
+.PHONY : list.c.s
+
 main.o: main.c.o
 
 .PHONY : main.o
@@ -159,6 +186,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... Moneytor"
 	@echo "... edit_cache"
+	@echo "... list.o"
+	@echo "... list.i"
+	@echo "... list.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

@@ -3,4 +3,4 @@ project(Moneytor C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(Moneytor main.c)
+add_executable(Moneytor main.c list.c)

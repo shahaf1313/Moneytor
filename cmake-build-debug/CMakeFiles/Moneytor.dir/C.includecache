@@ -6,6 +6,14 @@
 
 #IncludeRegexTransform: 
 
+/cygdrive/c/Users/Shahaf/CLionProjects/Moneytor/list.h
+stdio.h
+-
+stdlib.h
+-
+time.h
+-
+
 /cygdrive/c/Users/Shahaf/CLionProjects/Moneytor/main.c
 main.h
 /cygdrive/c/Users/Shahaf/CLionProjects/Moneytor/main.h
@@ -25,4 +33,6 @@ string.h
 -
 stdlib.h
 -
+list.h
+/cygdrive/c/Users/Shahaf/CLionProjects/Moneytor/list.h
 

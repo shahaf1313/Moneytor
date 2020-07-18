@@ -74,7 +74,16 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/cygdrive/c/Users/Shahaf/CLionProjects/Moneytor/list.c">
+			<Option target="Moneytor"/>
+		</Unit>
+		<Unit filename="/cygdrive/c/Users/Shahaf/CLionProjects/Moneytor/list.h">
+			<Option target="Moneytor"/>
+		</Unit>
 		<Unit filename="/cygdrive/c/Users/Shahaf/CLionProjects/Moneytor/main.c">
+			<Option target="Moneytor"/>
+		</Unit>
+		<Unit filename="/cygdrive/c/Users/Shahaf/CLionProjects/Moneytor/main.h">
 			<Option target="Moneytor"/>
 		</Unit>
 		<Unit filename="/cygdrive/c/Users/Shahaf/CLionProjects/Moneytor/CMakeLists.txt">
