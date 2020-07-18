@@ -21,4 +21,8 @@ sys/stat.h
 -
 unistd.h
 -
+string.h
+-
+stdlib.h
+-
 
