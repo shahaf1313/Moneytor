@@ -13,7 +13,11 @@
   <component name="ChangeListManager">
     <list default="true" id="fc38cb18-fdcc-4031-aec0-7a788a4bd033" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Moneytor.dir/list.c.o" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Moneytor.dir/list.c.o" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/Moneytor.exe" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/Moneytor.exe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/Moneytor.exe.stackdump" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/Moneytor.exe.stackdump" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/list.c" beforeDir="false" afterPath="$PROJECT_DIR$/list.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/list.h" beforeDir="false" afterPath="$PROJECT_DIR$/list.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/main.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.h" beforeDir="false" afterPath="$PROJECT_DIR$/main.h" afterDir="false" />
     </list>
@@ -79,7 +83,8 @@
       <option name="presentableId" value="Default" />
       <updated>1594903748359</updated>
       <workItem from="1594903750351" duration="713000" />
-      <workItem from="1594908632996" duration="39777000" />
+      <workItem from="1594908632996" duration="41166000" />
+      <workItem from="1595229808438" duration="30214000" />
     </task>
     <servers />
   </component>
@@ -91,7 +96,9 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
@@ -102,13 +109,22 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/main.c</url>
-          <line>160</line>
-          <option name="timeStamp" value="45" />
+          <line>56</line>
+          <option name="timeStamp" value="17" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint enabled="true" type="CidrExceptionBreakpoint" />
       </default-breakpoints>
     </breakpoint-manager>
+    <watches-manager>
+      <configuration name="CMakeRunConfiguration">
+        <watch expression="pFolderPath" language="ObjectiveC" />
+        <watch expression="(char*)entryName" language="ObjectiveC" />
+        <watch expression="(char*)pDirIt-&gt;entryName" language="ObjectiveC" />
+        <watch expression="(char*)pDirent-&gt;d_name" language="ObjectiveC" />
+        <watch expression="(char*)dirName" language="ObjectiveC" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>

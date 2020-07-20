@@ -26,7 +26,6 @@ int removeElement(list_t *list, node_t* pElement)
     }
     else if( list->counter == 1)
     {
-        free(pElement);
         list->last = NULL;
         list->first = NULL;
     }
@@ -35,14 +34,12 @@ int removeElement(list_t *list, node_t* pElement)
         node_t *newFirst = pElement->next;
         list->first = newFirst;
         newFirst->prev = NULL;
-        free(pElement);
     }
     else if(pElement == list->last)
     {
         node_t *newLast = pElement->prev;
         list->last = newLast;
         newLast->next = NULL;
-        free(pElement);
     }
     else
     {
@@ -50,19 +47,26 @@ int removeElement(list_t *list, node_t* pElement)
         node_t *pNext = pElement->next;
         pPrev->next = pNext;
         pNext->prev = pPrev;
-        free(pElement);
     }
+    /*Remove element allocated memory:*/
+    if(pElement->pSubDirList != NULL)
+    {
+        deleteList(pElement->pSubDirList);
+    }
+    free(pElement);
     --(list->counter);
     return 0;
 }
 
 /* This function adds an entry to the end of the list.
+ * Sub directory will not be initialized with files in subDirList, but with NULL instead.
  * on success returns 0, otherwise a another number */
 int addElement(list_t *list, char* name, time_t lastChanged, char *fileType)
 {
     node_t *newNode = (node_t*)malloc(sizeof(node_t));
     if(newNode == NULL) { return -1;}
     newNode->lastChanged = lastChanged;
+    newNode->pSubDirList = NULL;
     strcpy(newNode->entryName, name);
     strcpy(newNode->fileType, fileType);
     if(list->counter == 0)
@@ -125,9 +129,7 @@ void printList(list_t *list)
     while(it != NULL)
     {
         ++i;
-        char* prev = (it->prev == NULL) ? "NULL" : it->prev->entryName;
-        char* next = (it->next == NULL) ? "NULL" : it->next->entryName;
-        printf("[%d] %s, prev = %s, next = %s\n", i, it->entryName, prev, next);
+        printf("[%d] %s, %s \n", i, it->entryName, it->fileType);
         it = it->next;
     }
     printf("Total number of elements in the list: %d\n", list->counter);

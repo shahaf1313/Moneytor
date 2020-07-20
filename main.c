@@ -1,11 +1,12 @@
 #include "main.h"
 static volatile int keepRunning = 1;
+static int os = WINDOWS;
 
 int main(int argc, char **argv)
 {
     /*Variables declaration:*/
     char *pFolderPath;
-    list_t *pCurrFileList = initList(), *pNewFileList = initList();
+    list_t *pNewFileList = initList(), *pDirsList = initList();
 
     /*Attach SIGINT to the termination handler:*/
     signal(SIGINT, intHandler);
@@ -19,47 +20,84 @@ int main(int argc, char **argv)
     pFolderPath = argv[1];
     DIR* pDir = opendir(pFolderPath);
 
-    /*Open folder and change working dir:*/
+    /*Open folder and add folder to DirsList:*/
     if (pDir == NULL)
     {
         printf("Could not open specified directory. Usage: Monytor <dir_path>.");
         return -2;
     }
-    if (chdir(pFolderPath) != 0)
-    {
-        printf("Could not enter specified directory. Set appropriate permissions and try again.");
-        return -3;
-    }
+    addElement(pDirsList, pFolderPath, 0, "Directory");
 
-    /*Initialize file list for the first time:*/
-    getFileList(pDir, pCurrFileList);
+    /*Initialize file list for the first time, including all subdir if exists:*/
+    pDirsList->first->pSubDirList = initList();
+    getFileList(pDir, pDirsList->first->entryName, pDirsList->first->pSubDirList, pDirsList);
+    closedir(pDir);
+    node_t *pDirIt = pDirsList->first->next;
+    while (pDirIt != NULL)
+    {
+        pDir = opendir(pDirIt->entryName);
+        if ( pDir != NULL)
+        {
+            /*Whoohoo! Directory exists. Scan files and sub directories:*/
+            /*Read new file list:*/
+            getFileList(pDir, pDirIt->entryName, pDirIt->pSubDirList, pDirsList);
+            /*Close directory:*/
+            closedir(pDir);
+        }
+        else
+        {
+            printf("On initialization, could not print folder to read. FATAL ERROR!");
+            return -1;
+        }
+        pDirIt = pDirIt->next;
+    }
+    /*DBG: printDirTree(pDirsList);*/
 
     /*Start guarding the folder :)*/
     while(keepRunning)
     {
         printf("\n====================...Scanning...====================\n");
 
-        /*Read new file list:*/
-        getFileList(pDir, pNewFileList);
+        /*Iterate over all directories in the monitored folder:*/
+        node_t *pDirIt = pDirsList->first;
+        while(pDirIt != NULL)
+        {
+            pDir = opendir(pDirIt->entryName);
+            if (pDir != NULL)
+            {
+                /*Whoohoo! Directory exists. Scan files and sub directories:*/
+                /*Read new file list:*/
+                getFileList(pDir, pDirIt->entryName, pNewFileList, pDirsList);
+                /*Close directory:*/
+                closedir(pDir);
 
-        /*Print changes:*/
-        findDiffNodes(pCurrFileList, pNewFileList, "Deleted", FALSE);
-        findDiffNodes(pNewFileList, pCurrFileList, "Added", FALSE);
-        findDiffNodes(pCurrFileList, pNewFileList, "Updated", TRUE);
+                /*Print changes:*/
+                findDiffNodes(pDirIt->pSubDirList, pNewFileList, "Deleted", FALSE);
+                findDiffNodes(pNewFileList, pDirIt->pSubDirList, "Added", FALSE);
+                findDiffNodes(pDirIt->pSubDirList, pNewFileList, "Updated", TRUE);
 
-        /*Swap lists:*/
-        deleteList(pCurrFileList);
-        pCurrFileList = pNewFileList;
-        pNewFileList = initList();
+                /*Swap lists:*/
+                deleteList(pDirIt->pSubDirList);
+                pDirIt->pSubDirList = pNewFileList;
+                pNewFileList = initList();
+                pDirIt = pDirIt->next;
+            }
+            else
+            {
+                /*Directory has been deleted. Remove it from dirList and continue to next Directory*/
+                node_t *tmp = pDirIt->next;
+                removeElement(pDirsList, pDirIt);
+                pDirIt = tmp;
+            }
+        }
 
         /*Wait till next iteration:*/
         delay(SLEEP_TIME_SEC * 1000);
     }
 
     /*Exit properly: close dir, clean memory, etc:*/
-    deleteList(pCurrFileList);
+    deleteList(pDirsList);
     deleteList(pNewFileList);
-    closedir(pDir);
     printf("\n\nThanks for choosing Moneytor! Seeya again soon :)");
     return 0;
 }
@@ -73,21 +111,32 @@ void delay(unsigned int ms)
 }
 
 /* This function receives pointer to a directory and stores each entry in a string array (future - list) */
-static int getFileList(DIR* pDir, list_t* pFileList)
+static int getFileList(DIR* pDir, char *fullDirPath, list_t* pFileList, list_t *pDirList)
 {
     struct stat status;
     struct dirent *pDirent;
     time_t lastChanged;
-    char *pFileType;
+    char *pFileType, entryName[MAX_PATH_LENGTH] ;
     int i = 0;
     rewinddir(pDir);
     while((pDirent = readdir(pDir)) != NULL)
     {
-        /*Check entry's type:*/
-        pFileType = getEntryType(pDirent);
+        /*Skip self and father folder:*/
+        if( (strcmp(pDirent->d_name, "..") == 0) || (strcmp(pDirent->d_name, ".") == 0) )
+        {
+            continue;
+        }
+
+        /*Get entry's full path:*/
+        strcpy(entryName, fullDirPath);
+        strcat(entryName, "/");
+        strcat(entryName, pDirent->d_name);
+
+        /*Get entry's type and full path:*/
+        pFileType = getEntryType(pDirent, pDirList, entryName);
 
         /*Check entry's last changed time:*/
-        if(stat(pDirent->d_name, &status) == -1)
+        if(stat(entryName, &status) == -1)
         {
             printf("Could not read status of entry: %s. Please check permitions and try again.", pDirent->d_name);
             lastChanged = 0;
@@ -96,7 +145,7 @@ static int getFileList(DIR* pDir, list_t* pFileList)
         {
             lastChanged = status.st_atim.tv_sec;
         }
-        addElement(pFileList, pDirent->d_name, lastChanged, pFileType);
+        addElement(pFileList, entryName, lastChanged, pFileType);
         ++i;
 
         /*dbg: printf("[%s], %s, last changed in %s\n", pDirent->d_name, pFileType,  asctime(gmtime(&lastChanged)));*/
@@ -139,8 +188,9 @@ static void findDiffNodes(list_t *original, list_t *updated, char *strToPrint, i
     }
 }
 
-/* This function receives an entry in a folder and returns it's type */
-static char* getEntryType(struct dirent *pd)
+/* This function receives an entry in a folder and returns it's type and full path.
+ * If the current entry is a directory, the function searches it in dirList and if it doen't exists, adds it to the list.*/
+static char* getEntryNameAndType(struct dirent *pd, list_t *pDirList, char *entryName)
 {
     char *pFileType;
     switch (pd->d_type)
@@ -150,6 +200,23 @@ static char* getEntryType(struct dirent *pd)
             break;
         case DT_DIR:
             pFileType = "Directory";
+            /*Check if directory exists in DirsList, and if not - add it!*/
+            node_t *pDirIt = pDirList->first;
+            while(pDirIt != NULL)
+            {
+                if(strcmp(entryName, pDirIt->entryName) == 0)
+                {
+                    break;
+                }
+                pDirIt = pDirIt->next;
+            }
+            /*If pDirIt is NULL - you didn't find any directory in DirsList that matches to this dir.
+             * Thus, it is a new sub directory. Add it to DirsList!*/
+            if( pDirIt == NULL && (pDirList->counter > 0) )
+            {
+                addElement(pDirList, entryName, 0, pFileType);
+                pDirList->last->pSubDirList = initList();
+            }
             break;
         default:
             pFileType = "Unknown";
@@ -159,3 +226,32 @@ static char* getEntryType(struct dirent *pd)
 }
 
 void intHandler(int dummy) { keepRunning = 0; }
+
+/* This function prints the entire tree of files and subfolders in dirList */
+static void printDirTree(list_t *pDirList)
+{
+    printf("**********************************************PrintDirTree**********************************************\n\n");
+    printf("List of all subDirs:\n");
+    printList(pDirList);
+    printf("=================================\n\n");
+    node_t *pNodeIt = pDirList->first;
+    while(pNodeIt != NULL)
+    {
+        printf("File list in folder: %s:\n", pNodeIt->entryName);
+        if(pNodeIt->pSubDirList == NULL)
+        {
+            printf("SubDirList Uninitialized!!\n");
+            continue;
+        }
+        printList(pNodeIt->pSubDirList);
+        printf("-----------------------------------------\n\n");
+        pNodeIt = pNodeIt->next;
+    }
+}
+
+static void convertPathToWindowsFromat(char *linuxFormat)
+{
+    char tmp[MAX_PATH_LENGTH] = "c:";
+    strcpy(tmp + 2, linuxFormat + 11);
+    strcpy(linuxFormat, tmp);
+}

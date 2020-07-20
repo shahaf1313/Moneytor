@@ -9,17 +9,21 @@
 #define MAX_PATH_LENGTH 255
 #define TYPE_LENGTH 10
 
-typedef struct node {
-    struct node *prev, *next;
+typedef struct list list_t;
+typedef struct node node_t;
+
+struct node {
+    node_t *prev, *next;
     char entryName[MAX_PATH_LENGTH];
     time_t lastChanged;
     char fileType[TYPE_LENGTH];
-} node_t;
+    list_t *pSubDirList;
+};
 
-typedef struct list {
+struct list {
     node_t *first, *last;
     int counter;
-} list_t;
+};
 
 /* This function initializes the list.
  * on success returns 0, otherwise a another number */
