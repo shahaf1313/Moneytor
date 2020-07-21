@@ -1,1 +1,1 @@
-/usr/bin/cc -g  -Wl,--enable-auto-import CMakeFiles/Moneytor.dir/main.c.o CMakeFiles/Moneytor.dir/list.c.o  -o Moneytor.exe -Wl,--out-implib,libMoneytor.dll.a -Wl,--major-image-version,0,--minor-image-version,0 
+/usr/bin/cc -g   CMakeFiles/Moneytor.dir/main.c.o CMakeFiles/Moneytor.dir/list.c.o  -o Moneytor 

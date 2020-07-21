@@ -6,7 +6,11 @@
 
 #IncludeRegexTransform: 
 
-/cygdrive/c/Users/Shahaf/CLionProjects/Moneytor/list.h
+/mnt/c/Users/Shahaf/CLionProjects/Moneytor/list.c
+list.h
+/mnt/c/Users/Shahaf/CLionProjects/Moneytor/list.h
+
+/mnt/c/Users/Shahaf/CLionProjects/Moneytor/list.h
 stdio.h
 -
 stdlib.h
@@ -16,11 +20,11 @@ string.h
 time.h
 -
 
-/cygdrive/c/Users/Shahaf/CLionProjects/Moneytor/main.c
+/mnt/c/Users/Shahaf/CLionProjects/Moneytor/main.c
 main.h
-/cygdrive/c/Users/Shahaf/CLionProjects/Moneytor/main.h
+/mnt/c/Users/Shahaf/CLionProjects/Moneytor/main.h
 
-/cygdrive/c/Users/Shahaf/CLionProjects/Moneytor/main.h
+/mnt/c/Users/Shahaf/CLionProjects/Moneytor/main.h
 stdio.h
 -
 time.h
@@ -38,5 +42,5 @@ stdlib.h
 signal.h
 -
 list.h
-/cygdrive/c/Users/Shahaf/CLionProjects/Moneytor/list.h
+/mnt/c/Users/Shahaf/CLionProjects/Moneytor/list.h
 

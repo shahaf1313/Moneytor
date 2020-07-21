@@ -23,7 +23,7 @@ int main(int argc, char **argv)
     /*Open folder and add folder to DirsList:*/
     if (pDir == NULL)
     {
-        printf("Could not open specified directory. Usage: Monytor <dir_path>.");
+        printf("Could not open specified directory. Usage: Monytor <dir_path>.\n");
         return -2;
     }
     addElement(pDirsList, pFolderPath, 0, "Directory");
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
         }
         else
         {
-            printf("On initialization, could not print folder to read. FATAL ERROR!");
+            printf("On initialization, could not print folder to read. FATAL ERROR!\n");
             return -1;
         }
         pDirIt = pDirIt->next;
@@ -98,7 +98,7 @@ int main(int argc, char **argv)
     /*Exit properly: close dir, clean memory, etc:*/
     deleteList(pDirsList);
     deleteList(pNewFileList);
-    printf("\n\nThanks for choosing Moneytor! Seeya again soon :)");
+    printf("\n\nThanks for choosing Moneytor! Seeya again soon :)\n\n");
     return 0;
 }
 
@@ -190,7 +190,7 @@ static void findDiffNodes(list_t *original, list_t *updated, char *strToPrint, i
 
 /* This function receives an entry in a folder and returns it's type and full path.
  * If the current entry is a directory, the function searches it in dirList and if it doen't exists, adds it to the list.*/
-static char* getEntryNameAndType(struct dirent *pd, list_t *pDirList, char *entryName)
+static char* getEntryType(struct dirent *pd, list_t *pDirList, char *entryName)
 {
     char *pFileType;
     switch (pd->d_type)

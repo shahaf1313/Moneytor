@@ -1,4 +1,4 @@
-C:\cygwin64\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=C:/cygwin64/bin/make.exe -G "CodeBlocks - Unix Makefiles" /cygdrive/c/Users/Shahaf/CLionProjects/Moneytor
+/home/shahaf/cmake-3.15.0/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /mnt/c/Users/Shahaf/CLionProjects/Moneytor
 -- Configuring done
 -- Generating done
--- Build files have been written to: /cygdrive/c/Users/Shahaf/CLionProjects/Moneytor/cmake-build-debug
+-- Build files have been written to: /mnt/c/Users/Shahaf/CLionProjects/Moneytor/cmake-build-debug
