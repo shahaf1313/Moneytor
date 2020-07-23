@@ -10,7 +10,7 @@
 // CR: (DC) .idea/deployment.xml - Holds the ID of your WSL virtual machine, it is machine-specific
 // CR: (DC) .idea/workspace.xml - Holds the current configuration of your CLion editor tabs
 // CR: (DC) cmake-build-debug - This is the build directory, and should not be committed
-// CR: (DC) Please remove all the wrongfully comitted files and directories,
+// CR: (DC) Please remove all the wrongfully committed files and directories,
 // CR: (DC) tell Git to forget them (stop tracking them) and add them to .gitignore to prevent GitKraken
 // CR: (DC) from monitoring them.
 
@@ -28,7 +28,8 @@
 // CR: (DC) The best way to do it is with Unit Tests
 // CR: (DC) Read about the Cutie library: https://github.com/mrdor44/Cutie
 // CR: (DC) It is a library for C Unit Testing based on the popular GoogleTest
-// CR: (DC) So first, before fixing any other CR, add Cutie as a subrepo and create UT for your list module
+// CR: (DC) So first, before fixing any other CR, add Cutie as a subrepo (search google for
+// CR: (DC) GitKraken how to add subrepo) and create UT for your list module.
 // CR: (DC) Create at least one test for each function in the list module, so that after each change you
 // CR: (DC) can simply run the UT and see if it works.
 // CR: (DC) If you have doubts whether your UT are comprehensive enough before tackling the CRs, contact me
