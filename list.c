@@ -1,14 +1,20 @@
 #include "list.h"
 
+// CR: (DC) Do not duplicate documentation. It the function appears in the header file,
+// CR: (DC) there's no need to document it in the source file
 /* This function initializes the list.
  * on success returns 0, otherwise a another number */
 list_t* initList(void)
 {
+    // CR: (DC) Use sizeof(*list). This way, if we change list's type, it will still work
     list_t *list = (list_t*)malloc(sizeof(list_t));
     if( list == NULL)
     {
+        // CR: (DC) What happens if tomorrow we want to use perror() to print the debug message?
+        // CR: (DC) Create a macro DEBUG_PRINT that prints a debug message
         printf("Memory allocation failed. Plase try again after memory has been freed.\n");
     }
+    // CR: (DC) Note the warnings here. Why are they here?
     list->counter = 0;
     list->first = NULL;
     list->last = NULL;
@@ -19,6 +25,12 @@ list_t* initList(void)
  * on success returns 0, otherwise a another number */
 int removeElement(list_t *list, node_t* pElement)
 {
+    // CR: (DC) Notice how hard it is for you to remove or add elements, and it stems from the fact
+    // CR: (DC) that the removed element may be the first or the last (or both)
+    // CR: (DC) A common practice to make maintaining the list easier is to use dummy nodes
+    // CR: (DC) So we create two dummy nodes that will be the first and last nodes
+    // CR: (DC) This way, the removed node will always be in the middle of the list, and we will have only
+    // CR: (DC) one case to deal with.
     if(list->counter == 0)
     {
         printf("Tried to remove entry from a list with 0 elements.\n");
@@ -109,6 +121,7 @@ int deleteList(list_t *list)
 {
     while(list->first != NULL)
     {
+        // CR: (DC) What happens if removing the first node constantly fails?
         removeElement(list, list->first);
 
     }

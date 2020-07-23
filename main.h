@@ -1,6 +1,38 @@
 #ifndef MONEYTOR_MAIN_H
 #define MONEYTOR_MAIN_H
 
+// CR: (DC) Many of the files you committed should not be committed.
+// CR: (DC) Here is a list of the files and/or directories that should not be committed
+// CR: (DC) and an explanation what each one contains.
+// CR: (DC) I encourage you to open each one in your favorite text editor (hopefully, Sublime)
+// CR: (DC) and see what I'm talking about.
+// CR: (DC) The list of files and directories:
+// CR: (DC) .idea/deployment.xml - Holds the ID of your WSL virtual machine, it is machine-specific
+// CR: (DC) .idea/workspace.xml - Holds the current configuration of your CLion editor tabs
+// CR: (DC) cmake-build-debug - This is the build directory, and should not be committed
+// CR: (DC) Please remove all the wrongfully comitted files and directories,
+// CR: (DC) tell Git to forget them (stop tracking them) and add them to .gitignore to prevent GitKraken
+// CR: (DC) from monitoring them.
+
+// CR: (DC) In our shared Google Drive directory, there are two conventions documents
+// CR: (DC) Link: https://drive.google.com/drive/folders/1zCWN1LOd_9gxki_tvbB1LSZtc1eEglKV
+// CR: (DC) Please read them and fix the code accordingly
+// CR: (DC) Note #1: I saw you chose the camelCase naming convention, which is perfectly fine.
+// CR: (DC) DO NOT convert your code to snake_case now, we will just keep going with camelCase.
+// CR: (DC) Note #2: I saw you chose to name your structs list_t, while our convention is t_list
+// CR: (DC) DO NOT change your convention to t_list now, we will keep using list_t.
+// CR: (DC) Note #3: If you have any futher questions about conventions, feel free to ask
+
+// CR: (DC) The list module has a lot of CRs and is going to change. We want to able to make small changes
+// CR: (DC) and after each small change, test that our change didn't break the code
+// CR: (DC) The best way to do it is with Unit Tests
+// CR: (DC) Read about the Cutie library: https://github.com/mrdor44/Cutie
+// CR: (DC) It is a library for C Unit Testing based on the popular GoogleTest
+// CR: (DC) So first, before fixing any other CR, add Cutie as a subrepo and create UT for your list module
+// CR: (DC) Create at least one test for each function in the list module, so that after each change you
+// CR: (DC) can simply run the UT and see if it works.
+// CR: (DC) If you have doubts whether your UT are comprehensive enough before tackling the CRs, contact me
+
 #include <stdio.h>
 #include <time.h>
 #include <dirent.h>
