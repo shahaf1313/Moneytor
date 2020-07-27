@@ -1,4 +1,0 @@
-ToolSet: Ubuntu 20.04 LTS (local)@C:\Users\Shahaf\AppData\Local\Microsoft\WindowsApps\ubuntu.exe
-Options: 
-
-Options:
