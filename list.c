@@ -13,6 +13,7 @@ list_t* initList(void)
         // CR: (DC) What happens if tomorrow we want to use perror() to print the debug message?
         // CR: (DC) Create a macro DEBUG_PRINT that prints a debug message
         printf("Memory allocation failed. Plase try again after memory has been freed.\n");
+        return NULL;
     }
     // CR: (DC) Note the warnings here. Why are they here?
     list->counter = 0;
@@ -134,8 +135,8 @@ int deleteList(list_t *list)
     return 0;
 }
 
-/* This function prints a list to stdout */
-void printList(list_t *list)
+/* This function prints a list to stdout. On success - returns 0. */
+int printList(list_t *list)
 {
     node_t *it = list->first;
     int i = 0;
@@ -146,4 +147,10 @@ void printList(list_t *list)
         it = it->next;
     }
     printf("Total number of elements in the list: %d\n", list->counter);
+    if(i != list->counter)
+    {
+        return -1;
+    }
+
+    return 0;
 }

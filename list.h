@@ -77,7 +77,7 @@ list_t* copyList(list_t *src);
  * on success returns 0, otherwise a another number */
 int deleteList(list_t *list);
 
-/* This function prints a list to stdout */
-void printList(list_t *list);
+/* This function prints a list to stdout. On success - returns 0. */
+int printList(list_t *list);
 
 #endif //MONEYTOR_LIST_H

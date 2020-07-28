@@ -2,5 +2,9 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Cutie" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Cutie/C-Mock" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Cutie/googletest" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Cutie/subhook" vcs="Git" />
   </component>
 </project>
