@@ -94,4 +94,7 @@ TEST(Sample, Test)
     //destroy list:
     EXPECT_EQ(LIST_destroy(list), 0);
 
+    relMem((void*)pDataArr[NODES_NUM-1]);
+
+
 }

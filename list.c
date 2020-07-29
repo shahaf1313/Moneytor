@@ -83,6 +83,9 @@ int LIST_removeElement(LIST list, void* pDataElement) {
         return -4;
     }
 
+    // Don't forget to release the node itself!
+    free(iterator);
+
     // Success!
     return 0;
 }
