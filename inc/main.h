@@ -14,6 +14,8 @@
 #define SLEEP_TIME_SEC 10
 #define TRUE 1
 #define FALSE 0
+#define MAX_PATH_LENGTH 255
+#define MAX_TYPE_LENGTH 10
 
 typedef struct fileInfo {
     char fileName[MAX_PATH_LENGTH];

@@ -1,4 +1,4 @@
-#include "main.h"
+#include "inc/main.h"
 static volatile int keepRunning = 1;
 
 int main(int argc, char **argv)

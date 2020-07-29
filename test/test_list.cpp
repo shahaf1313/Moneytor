@@ -1,40 +1,31 @@
 extern "C" {
     #include <stdio.h>
-    #include <stdarg.h>
     #include <stdlib.h>
-    #include <string.h>
-    // CR: (DC) Use #include "list.h" (see CRs in CMakeLists.txt)
-    #include "../list.h"
-    // CR: (DC) Everything below here can be moved outside of the extern "C"
-    // CR: (DC) as it is valid C++ code
-    #define NODES_NUM 9
-    typedef struct data {
-        char name[100];
-        int num;
-    } data_t;
-
-    int relMem(void* pDataVoid) {
-        data_t* pData = (data_t*)pDataVoid;
-        free(pData);
-        return 0;
-    }
-
-    char* getName(void* pDataVoid) {
-        return ((data_t*)pDataVoid)->name;
-    }
+    #include "inc/list.h"
 }
 
 #include "mock.hpp"
 #include "hook.hpp"
-#include <iostream>
-// CR: (DC) We don't use an entire namespace, as it pollutes our namespace
-// CR: (DC) Add specific using directives based on the specific things you need
-using namespace std;
+
+#define NODES_NUM 9
+
+typedef struct data {
+    char name[100];
+    int num;
+} data_t;
+
+int relMem(void* pDataVoid) {
+    data_t* pData = (data_t*)pDataVoid;
+    free(pData);
+    return 0;
+}
+
+char* getName(void* pDataVoid) {
+    return ((data_t *) pDataVoid)->name;
+}
 using namespace testing;
 
-
-// CR: (DC) Rename test
-TEST(Sample, Test)
+TEST(Sample, LIST_test)
 {
     int i;
     char ch, snum[2];
@@ -42,16 +33,16 @@ TEST(Sample, Test)
 
     //create list and check:
     // CR: (DC) Can't you just pass free?
+    // CR: (SE) Yes, it will work. just to stay generic for feauture adaptations if needed :)
     LIST list = LIST_create(relMem, getName);
     EXPECT_NE(list, nullptr);
     EXPECT_EQ(LIST_getLength(list), 0);
 
     //try to remove from empty list:
-    EXPECT_EQ(LIST_removeElement(list, nullptr), -2);
+    EXPECT_EQ(LIST_removeElement(list, nullptr), RETURNCODE_LIST_REMOVEELEMENT_LIST_EMPTY);
 
     //try to add null element:
-    EXPECT_EQ(LIST_addElement(list, nullptr), -1);
-
+    EXPECT_EQ(LIST_addElement(list, nullptr), RETURNCODE_LIST_ADDELEMENT_LIST_OR_PADTA_NULL);
 
     //create data to store:
     data_t* pDataArr[NODES_NUM];
@@ -63,9 +54,6 @@ TEST(Sample, Test)
         strcpy(pDataArr[i]->name, "HelloDataStruct");
         strcat(pDataArr[i]->name, snum);
         pDataArr[i]->num = i;
-        // CR: (DC) Delete commented out code
-        //cout << "node name is " << pDataArr[i]->name << " and num " << pDataArr[i]->num ;
-        //cout << ", pointer to data - " << pDataArr[i] << "\n";
     }
 
     //add all elements BUT the last:
@@ -78,15 +66,11 @@ TEST(Sample, Test)
     EXPECT_EQ(LIST_print(list), 0);
 
     //remove non existing element;
-    EXPECT_EQ(LIST_removeElement(list, (void*)pDataArr[NODES_NUM-1]), -3);
+    EXPECT_EQ(LIST_removeElement(list, (void*)pDataArr[NODES_NUM-1]), RETURNCODE_LIST_REMOVEELEMENT_ELEMENT_NOT_FOUND);
     EXPECT_EQ(LIST_getLength(list), NODES_NUM-1);
 
-    // CR: (DC) Can be moved to a different test
-    //try to add element to null list:
-    EXPECT_EQ(LIST_addElement(nullptr, pDataArr[0]), -1);
-
     //try to add existing element:
-    EXPECT_EQ(LIST_addElement(list, pDataArr[0]), -2);
+    EXPECT_EQ(LIST_addElement(list, pDataArr[0]), 0);
 
     //remove all elements BUT one:
     for(i=1; i<NODES_NUM-1; i++) {
@@ -97,13 +81,13 @@ TEST(Sample, Test)
     EXPECT_EQ(LIST_print(list), 0);
 
     //get current length:
-    EXPECT_EQ(LIST_getLength(list), 1);
+    EXPECT_EQ(LIST_getLength(list), 2);
 
     //destroy list:
     EXPECT_EQ(LIST_destroy(list), 0);
 
     // CR: (DC) Why not just use free?
+    // CR: (SE) Again, practocally the same, just to stay generic :)
     relMem((void*)pDataArr[NODES_NUM-1]);
-
 
 }
