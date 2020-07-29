@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.14)
 project(Moneytor CXX C)
 
+# CR: (DC) Add the following two definitions:
+# CR: (DC) set(CMAKE_INCLUDE_CURRENT_DIR ON) - Adds the project root to the include path
+# CR: (DC) set(CMAKE_VERBOSE_MAKEFILE ON) - Makes the compilation process be verbose (will appear in the Messages)
+
 add_executable(Moneytor main.c list.c)
 
 set(CUTIE_DIR Cutie)

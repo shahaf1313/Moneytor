@@ -1,5 +1,9 @@
 #include "list.h"
 
+// CR: (DC) Create typedefs for these function types
+// CR: (DC) For example:
+// CR: (DC) typedef int (*memory_release_function_t)(void*)
+// CR: (DC) This creates the type memory_release_function_t
 LIST LIST_create(int (*memoryReleaseFunc)(void*), char* (*getDataNameFunc)(void*))
 {
     LIST list = (list_t*)malloc(sizeof(*list));
@@ -7,6 +11,8 @@ LIST LIST_create(int (*memoryReleaseFunc)(void*), char* (*getDataNameFunc)(void*
     node_t* lastDummyNode = (node_t*)malloc(sizeof(*lastDummyNode));
     if( list == NULL || firstDummyNode == NULL || lastDummyNode == NULL) {
         DEBUG_PRINT("Memory allocation failed in LIST_create function. Please try again after memory has been freed.\n");
+        // CR: (DC) If one allocation succeeded and the rest failed, what happens with the
+        // CR: (DC) memory successfully allocated? It is leaked
         return NULL;
     }
     // Set list params:
@@ -33,6 +39,9 @@ LIST LIST_create(int (*memoryReleaseFunc)(void*), char* (*getDataNameFunc)(void*
 int LIST_getLength(LIST list) {
     // Check if list is not null:
     if (list == NULL) {
+        // CR: (DC) Notice how you always add \n to DEBUG_PRINT. Seems like you are repeating yourself,
+        // CR: (DC) and that's not something we like to do
+        // CR: (DC) Make DEBUG_PRINT add the \n for us
         DEBUG_PRINT("LIST given is NULL. Please try again.\n");
         return -1;
     }
@@ -46,12 +55,14 @@ int LIST_removeElement(LIST list, void* pDataElement) {
         return -1;
     }
 
+    // CR: (DC) No need for comments that don't add information
     // Check if the list is not empty:
     if(list->length == 0) {
         DEBUG_PRINT("Tried to remove node from an empty list.\n");
         return -2;
     }
 
+    // CR: (DC) Can be converted to a for loop
     // Look for the element in the given list:
     node_t* iterator = list->first->next;
     while (iterator != list->last) {
@@ -65,24 +76,33 @@ int LIST_removeElement(LIST list, void* pDataElement) {
     // Verify that we have found it:
     if(iterator == list->last) {
         DEBUG_PRINT("Given element was not found in the list.\n");
+        // CR: (DC) Notice how you're using numbers to indicate errors in the code, which is very
+        // CR: (DC) cumbersome. A better technique is to create an enum, called return_code_t,
+        // CR: (DC) that will contain constants used to indicate errors
+        // CR: (DC) For example, the constant that will be used in the line below will be:
+        // CR: (DC) return RETURNCODE_LIST_REMOVEELEMENT_ELEMENT_NOT_FOUND
         return -3;
     }
 
     // Change connectivity in the list:
+    // CR: (DC) Be consistent with your code style. Use AutoFormat (Ctrl+Alt+L) rigorously
     node_t* pPrev = iterator->prev;
     node_t *pNext = iterator->next;
     pPrev->next = pNext;
     pNext->prev = pPrev;
 
+    // CR: (DC) No need for useless comments and useless parentheses
     // Update list length:
     --(list->length);
 
     // Remove element allocated memory:
+    // CR: (DC) You can omit the * and () around the function pointer
     if( (*list->memoryReleaseFunc)(iterator->data) != 0) {
         DEBUG_PRINT("Failed to free data memory with the given memory release function.\n");
         return -4;
     }
 
+    // CR: (DC) After we free a pointer we set it to NULL, to prevent using an invalid pointer afterwards
     // Don't forget to release the node itself!
     free(iterator);
 
@@ -92,6 +112,7 @@ int LIST_removeElement(LIST list, void* pDataElement) {
 
 int LIST_addElement(LIST list, void* pData)
 {
+    // CR: (DC) Unify all parameter checks to a single if block
     // Check if list is not null:
     if (list == NULL) {
         DEBUG_PRINT("LIST given is NULL. Please try again.\n");
@@ -103,6 +124,7 @@ int LIST_addElement(LIST list, void* pData)
         DEBUG_PRINT("pData given is NULL. Please try again.\n");
         return -1;
     }
+    // CR: (DC) Why is that? Let me add duplicates if I wish to
     // Check if data element is ALREADY in the list:
     node_t* iterator = list->first->next;
     while (iterator != list->last) {
@@ -146,6 +168,7 @@ int LIST_destroy(LIST list)
     }
 
     // Iterate over all valid nodes and remove them:
+    // CR: (DC) Can use LIST_getLength here
     while(list->first->next != list->last)
     {
         // Try to remove first node:

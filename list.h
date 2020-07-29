@@ -1,14 +1,24 @@
 #ifndef MONEYTOR_LIST_H
 #define MONEYTOR_LIST_H
 
+// CR: (DC) Be frugal with the #includes you put here, as each #include here will bloat your user's code
+// CR: (DC) For example, time.h is not needed here, but inside list.c. Same goes for pretty much every #include here
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+// CR: (DC) As the name suggests, this is a private header, which I guess means it's only to be used by the
+// CR: (DC) module's developer. If so, why does the user of the module #include it?
+// CR: (DC) Because remember, by #including list.h, the user of the module #includes every header here,
+// CR: (DC) recursively
 #include "list_private.h"
 
+// CR: (DC) 1. The .idea/codeStyles should be committed, it defines code formatting for the project
+// CR: (DC) 2. Create src/ and inc/ directories, or per-module directories (list/, main/)
 
+// CR: (DC) The user couldn't care less what is your debug printing macro
 #define DEBUG_PRINT printf
+// CR: (DC) Do these constants have anything to do with the list as a module?
 #define MAX_PATH_LENGTH 255
 #define MAX_TYPE_LENGTH 10
 
