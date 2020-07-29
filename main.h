@@ -14,8 +14,19 @@
 #define SLEEP_TIME_SEC 10
 #define TRUE 1
 #define FALSE 0
-#define WINDOWS 0
-#define LINUX 1
+
+typedef struct fileInfo {
+    char fileName[MAX_PATH_LENGTH];
+    time_t lastChanged;
+    char fileType[MAX_TYPE_LENGTH];
+} fileInfo_t;
+
+typedef struct dirInfo {
+    char dirName[MAX_PATH_LENGTH];
+    struct list *subDirList;
+} dirInfo_t;
+
+
 
 
 /* This function makes a delay of ms milliseconds */

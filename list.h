@@ -5,79 +5,68 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include "list_private.h"
 
+
+#define DEBUG_PRINT printf
 #define MAX_PATH_LENGTH 255
-#define TYPE_LENGTH 10
+#define MAX_TYPE_LENGTH 10
 
-typedef struct list list_t;
-typedef struct node node_t;
+/**
+ * This function creates a list.
+ * It allocates memory for its own usage. When the user finishes using the list, he MUST call LIST_destroy(LIST list)
+ * in order to free all allocated memory.
+ * ALL data stored in the list must be of the same type!
+ * @memoryReleaseFunc [IN] a pointer to function that releases allocated memory for the data in each node.
+ * @getDataNameFunc [IN] a pointer to a function that prints a unique name to each of the data elements stored in the
+ * list.
+ * @return On success - a valid LIST instance, On failure - NULL.
+**/
+LIST LIST_create(int (*memoryReleaseFunc)(void *ptr), char* (*getDataNameFunc)(void*));
 
-// CR: (DC) Your list is dedicated for storing this type of data
-// CR: (DC) If tomorrow I want a list module that can store integers, I can't use your module
-// CR: (DC) So, what we're gonna do is make your list generic
-// CR: (DC) Generics in C is implemented using void*
-// CR: (DC) So, to make your list generic, your node should hold the data as a void*
-// CR: (DC) Meaning, the node doesn't have a clue what the data it holds is
-struct node {
-    node_t *prev, *next;
-    char entryName[MAX_PATH_LENGTH];
-    time_t lastChanged;
-    char fileType[TYPE_LENGTH];
-    list_t *pSubDirList;
-};
+/**
+ * This function returns the length of the given list.
+ * @list [IN] is a LIST instance to get it's length.
+ * @return length as a positive number on success, -1 when list is NULL.
+**/
+int LIST_getLength(LIST list);
 
-// CR: (DC) We don't want the developer using the list module to know the internals of our struct
-// CR: (DC) If the user of our module knows our structure, they might access the internal fields and change them
-// CR: (DC) under our feet, which is terrible.
-// CR: (DC) So, what we would do is put the struct definition in the .c file, to hide it from the user of the
-// CR: (DC) module. So what will remain here for the user to know? The following line:
-// CR: (DC) typedef struct list_s* list_t;
-// CR: (DC) Note #1: Notice we've named the struct list_s, to identify that it is a struct
-// CR: (DC) Note #2: Notice we define list_t as a pointer. The reason is that we want our user to work
-// CR: (DC) with list_t in his code, and not with list_t*, to make his life easier.
-// CR: (DC) This practice is known as ADT (Abstract Data Type) or "opaque data type".
-struct list {
-    // CR: (DC) Split each field to a seperate line
-    node_t *first, *last;
-    // CR: (DC) What does it count? The number of birds in the sky? A more meaningful name would be "length"
-    int counter;
-};
+/**
+ * This function removes a specified node from the list.
+ * It releases the memory allocated for the data of the specified node.
+ * @list [IN,OUT] is a LIST instance to remove from.
+ * @pDataElement [IN] is a pointer to the data element that we want to remove from the list.
+ * @return 0 on success, -1 when list and/or pData are NULL, -2 when the list is empty, -3 when failed to find node in the list,
+ * -4 on memory release failure.
+**/
+int LIST_removeElement(LIST list, void* pDataElement);
 
-// CR: (DC) Our convention is that all functions in a module will be named MODULE_function
-// CR: (DC) A few examples:
-// CR: (DC) LIST_create (conventionally we use create over init)
-// CR: (DC) LIST_removeElement
-// CR: (DC) LIST_addElement
-// CR: (DC) LIST_destroy (instead of deleteList)
+/**
+ * This function adds a node to the end of the list.
+ * It allocates memory for the specified node.
+ * @list [IN,OUT] is a LIST instance whom we add to.
+ * @pData [IN] is a pointer to the data that will be contained in the node.
+ * @return 0 on success, -1 when list is NULL, -2 when element is already in the list,
+ * -3 when failed to allocate memory for the node.
+**/
+int LIST_addElement(LIST list, void* pData);
 
-// CR: (DC) The function doesn't initialize the list, it creates the list
-// CR: (DC) There's a semantic difference between initialization and creation
-// CR: (DC) And, the documentation regarding the return value is wrong
-// CR: (DC) Also, specify in the docs that LIST_destroy should be called when we're done with the list
-/* This function initializes the list.
- * on success returns 0, otherwise a another number */
-list_t* initList(void);
+/**
+ * This function destroys the list and frees all its memory, including that of the data in the nodes.
+ * @list [IN] is a LIST instance to destroy.
+ * @return 0 on success, -1 when list is NULL, -2 when failed to destroy list.
+**/
+int LIST_destroy(LIST list);
 
-/* This function removes a specified entry from the list.
- * on success returns 0, otherwise a another number */
-// CR: (DC) You mixed using list_t* and list_t * (note the space between the type and the *)
-// CR: (DC) Our convention is for the * to be next to the type
-// CR: (DC) You can use AutoFormat (Ctrl+Alt+L) to have CLion format your code
-int removeElement(list_t *list, node_t* pElement);
-
-/* This function adds an entry to the end of the list.
- * on success returns 0, otherwise a another number */
-int addElement(list_t *list, char* name, time_t lastChanged, char* fileType);
-
-/* This function copies a list from src and returns it's new copy via a pointer.
- * on success returns a valid pointer, otherwise NULL */
-list_t* copyList(list_t *src);
-
-/* This function deletes list and frees all its memory.
- * on success returns 0, otherwise a another number */
-int deleteList(list_t *list);
-
-/* This function prints a list to stdout. On success - returns 0. */
-int printList(list_t *list);
+/**
+ * This function prints a list to stdout in the format:
+ * For each node -
+ * [NodeNumber] , [DataPointerName]
+ * Summery line -
+ * Total number of elements in the list: [listLength]
+ * @list [IN] is a LIST instance to print.
+ * @return 0 on success, -1 when list is NULL, -2 on failure.
+**/
+int LIST_print(LIST list);
 
 #endif //MONEYTOR_LIST_H

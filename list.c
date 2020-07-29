@@ -1,156 +1,192 @@
 #include "list.h"
 
-// CR: (DC) Do not duplicate documentation. It the function appears in the header file,
-// CR: (DC) there's no need to document it in the source file
-/* This function initializes the list.
- * on success returns 0, otherwise a another number */
-list_t* initList(void)
+LIST LIST_create(int (*memoryReleaseFunc)(void*), char* (*getDataNameFunc)(void*))
 {
-    // CR: (DC) Use sizeof(*list). This way, if we change list's type, it will still work
-    list_t *list = (list_t*)malloc(sizeof(list_t));
-    if( list == NULL)
-    {
-        // CR: (DC) What happens if tomorrow we want to use perror() to print the debug message?
-        // CR: (DC) Create a macro DEBUG_PRINT that prints a debug message
-        printf("Memory allocation failed. Plase try again after memory has been freed.\n");
+    LIST list = (list_t*)malloc(sizeof(*list));
+    node_t* firstDummyNode = (node_t*)malloc(sizeof(*firstDummyNode));
+    node_t* lastDummyNode = (node_t*)malloc(sizeof(*lastDummyNode));
+    if( list == NULL || firstDummyNode == NULL || lastDummyNode == NULL) {
+        DEBUG_PRINT("Memory allocation failed in LIST_create function. Please try again after memory has been freed.\n");
         return NULL;
     }
-    // CR: (DC) Note the warnings here. Why are they here?
-    list->counter = 0;
-    list->first = NULL;
-    list->last = NULL;
+    // Set list params:
+    list->length = 0;
+    list->memoryReleaseFunc = memoryReleaseFunc;
+    list->getDataNameFunc = getDataNameFunc;
+    list->first = firstDummyNode;
+    list->last = lastDummyNode;
+
+    // Set first dummy node:
+    firstDummyNode->prev = NULL;
+    firstDummyNode->next = lastDummyNode;
+    firstDummyNode->data = NULL;
+
+    // Set last dummy node:
+    lastDummyNode->prev = firstDummyNode;
+    lastDummyNode->next = NULL;
+    lastDummyNode->data = NULL;
+
+    // Success!
     return list;
 }
 
-/* This function removes a specified entry from the list.
- * on success returns 0, otherwise a another number */
-int removeElement(list_t *list, node_t* pElement)
-{
-    // CR: (DC) Notice how hard it is for you to remove or add elements, and it stems from the fact
-    // CR: (DC) that the removed element may be the first or the last (or both)
-    // CR: (DC) A common practice to make maintaining the list easier is to use dummy nodes
-    // CR: (DC) So we create two dummy nodes that will be the first and last nodes
-    // CR: (DC) This way, the removed node will always be in the middle of the list, and we will have only
-    // CR: (DC) one case to deal with.
-    if(list->counter == 0)
-    {
-        printf("Tried to remove entry from a list with 0 elements.\n");
+int LIST_getLength(LIST list) {
+    // Check if list is not null:
+    if (list == NULL) {
+        DEBUG_PRINT("LIST given is NULL. Please try again.\n");
         return -1;
     }
-    else if( list->counter == 1)
-    {
-        list->last = NULL;
-        list->first = NULL;
+    return list->length;
+}
+
+int LIST_removeElement(LIST list, void* pDataElement) {
+    // Check if list is not null:
+    if (list == NULL) {
+        DEBUG_PRINT("LIST given is NULL. Please try again.\n");
+        return -1;
     }
-    else if(pElement == list->first)
-    {
-        node_t *newFirst = pElement->next;
-        list->first = newFirst;
-        newFirst->prev = NULL;
+
+    // Check if the list is not empty:
+    if(list->length == 0) {
+        DEBUG_PRINT("Tried to remove node from an empty list.\n");
+        return -2;
     }
-    else if(pElement == list->last)
-    {
-        node_t *newLast = pElement->prev;
-        list->last = newLast;
-        newLast->next = NULL;
+
+    // Look for the element in the given list:
+    node_t* iterator = list->first->next;
+    while (iterator != list->last) {
+        if(iterator->data == pDataElement) {
+            //found element!
+            break;
+        }
+        iterator = iterator->next;
     }
-    else
-    {
-        node_t *pPrev = pElement->prev;
-        node_t *pNext = pElement->next;
-        pPrev->next = pNext;
-        pNext->prev = pPrev;
+
+    // Verify that we have found it:
+    if(iterator == list->last) {
+        DEBUG_PRINT("Given element was not found in the list.\n");
+        return -3;
     }
-    /*Remove element allocated memory:*/
-    if(pElement->pSubDirList != NULL)
-    {
-        deleteList(pElement->pSubDirList);
+
+    // Change connectivity in the list:
+    node_t* pPrev = iterator->prev;
+    node_t *pNext = iterator->next;
+    pPrev->next = pNext;
+    pNext->prev = pPrev;
+
+    // Update list length:
+    --(list->length);
+
+    // Remove element allocated memory:
+    if( (*list->memoryReleaseFunc)(iterator->data) != 0) {
+        DEBUG_PRINT("Failed to free data memory with the given memory release function.\n");
+        return -4;
     }
-    free(pElement);
-    --(list->counter);
+
+    // Success!
     return 0;
 }
 
-/* This function adds an entry to the end of the list.
- * Sub directory will not be initialized with files in subDirList, but with NULL instead.
- * on success returns 0, otherwise a another number */
-int addElement(list_t *list, char* name, time_t lastChanged, char *fileType)
+int LIST_addElement(LIST list, void* pData)
 {
-    node_t *newNode = (node_t*)malloc(sizeof(node_t));
-    if(newNode == NULL) { return -1;}
-    newNode->lastChanged = lastChanged;
-    newNode->pSubDirList = NULL;
-    strcpy(newNode->entryName, name);
-    strcpy(newNode->fileType, fileType);
-    if(list->counter == 0)
-    {
-        list->first = newNode;
-        list->last = newNode;
-        newNode->prev = NULL;
-        newNode->next = NULL;
+    // Check if list is not null:
+    if (list == NULL) {
+        DEBUG_PRINT("LIST given is NULL. Please try again.\n");
+        return -1;
     }
-    else
-    {
-        node_t* tmp = list->last;
-        newNode->prev = tmp;
-        newNode->next = NULL;
-        tmp->next = newNode;
-        list->last = newNode;
+
+    // Check if pData is NULL:
+    if (pData == NULL) {
+        DEBUG_PRINT("pData given is NULL. Please try again.\n");
+        return -1;
     }
-    ++(list->counter);
+    // Check if data element is ALREADY in the list:
+    node_t* iterator = list->first->next;
+    while (iterator != list->last) {
+        if(iterator->data == pData) {
+            DEBUG_PRINT("Data element is ALREADY in the list! He was not added again.\n");
+            return -2;
+        }
+        iterator = iterator->next;
+    }
+
+    // Allocate memory to the new node:
+    node_t* newNode = (node_t*)malloc(sizeof(*newNode));
+    if(newNode == NULL) {
+        DEBUG_PRINT("Memory allocation failed in LIST_addElement function. Please try again after memory has been freed.\n");
+        return -3;
+    }
+
+    // Point to the data:
+    newNode->data = pData;
+
+    // Set node in the end of the list:
+    node_t* lastValidNode = list->last->prev;
+    lastValidNode->next = newNode;
+    newNode->prev = lastValidNode;
+    newNode->next = list->last;
+    list->last->prev = newNode;
+
+    // Update list length:
+    ++(list->length);
+
+    // Success!
     return 0;
 }
 
-/* This function copies a list from src and returns it's new copy via a pointer.
- * on success returns a valid pointer, otherwise NULL */
-list_t* copyList(list_t *src)
+int LIST_destroy(LIST list)
 {
-    list_t *pNewList = initList();
-    if(pNewList == NULL) { return NULL; }
-    node_t *srcIt = src->first;
-    while(srcIt != NULL)
-    {
-        addElement(pNewList, srcIt->entryName, srcIt->lastChanged, srcIt->fileType);
-        srcIt = srcIt->next;
-    }
-    return pNewList;
-}
-
-/* This function deletes list and frees all its memory.
- * on success returns 0, otherwise a another number */
-int deleteList(list_t *list)
-{
-    while(list->first != NULL)
-    {
-        // CR: (DC) What happens if removing the first node constantly fails?
-        removeElement(list, list->first);
-
-    }
-    if(list->counter!=0)
-    {
-        printf("Error. Could not free all elements in the list.\n");
+    // Check if list is not null:
+    if (list == NULL) {
+        DEBUG_PRINT("LIST given is NULL. Please try again.\n");
         return -1;
     }
+
+    // Iterate over all valid nodes and remove them:
+    while(list->first->next != list->last)
+    {
+        // Try to remove first node:
+        if( LIST_removeElement(list, list->first->next->data) != 0) {
+            return -2;
+        }
+    }
+
+    // Now, free dummy nodes and list memory allocations:
+    free(list->first);
+    free(list->last);
     free(list);
+
+    // Success!
     return 0;
 }
 
-/* This function prints a list to stdout. On success - returns 0. */
-int printList(list_t *list)
+int LIST_print(LIST list)
 {
-    node_t *it = list->first;
+    // Check if list is not null:
+    if (list == NULL) {
+        DEBUG_PRINT("LIST given is NULL. Please try again.\n");
+        return -1;
+    }
+
+    // Iterate over the list and print elements:
+    DEBUG_PRINT("*******************************LIST_print TIME*******************************\n");
+    node_t* iterator = list->first->next;
     int i = 0;
-    while(it != NULL)
+    while(iterator != list->last)
     {
         ++i;
-        printf("[%d] %s, %s \n", i, it->entryName, it->fileType);
-        it = it->next;
+        char* dataName = (*list->getDataNameFunc)(iterator->data);
+        DEBUG_PRINT("[%d], %s \n", i, dataName);
+        iterator = iterator->next;
     }
-    printf("Total number of elements in the list: %d\n", list->counter);
-    if(i != list->counter)
+    DEBUG_PRINT("Total number of elements in the list: %d\n", list->length);
+
+    // Check that we are good:
+    if(i != list->length)
     {
-        return -1;
+        return -2;
     }
 
+    // Success!
     return 0;
 }
