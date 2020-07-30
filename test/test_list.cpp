@@ -15,8 +15,8 @@ typedef struct data {
 } data_t;
 
 int relMem(void* pDataVoid) {
-    data_t* pData = (data_t*)pDataVoid;
-    free(pData);
+    free(pDataVoid);
+    pDataVoid = NULL;
     return 0;
 }
 
@@ -32,8 +32,6 @@ TEST(Sample, LIST_test)
     snum[1] = '\0';
 
     //create list and check:
-    // CR: (DC) Can't you just pass free?
-    // CR: (SE) Yes, it will work. just to stay generic for feauture adaptations if needed :)
     LIST list = LIST_create(relMem, getName);
     EXPECT_NE(list, nullptr);
     EXPECT_EQ(LIST_getLength(list), 0);
@@ -86,8 +84,6 @@ TEST(Sample, LIST_test)
     //destroy list:
     EXPECT_EQ(LIST_destroy(list), 0);
 
-    // CR: (DC) Why not just use free?
-    // CR: (SE) Again, practocally the same, just to stay generic :)
     relMem((void*)pDataArr[NODES_NUM-1]);
 
 }
