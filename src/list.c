@@ -50,6 +50,60 @@ int LIST_getLength(LIST list) {
     return list->length;
 }
 
+void* LIST_getFirst(LIST list) {
+    if (list == NULL) {
+        return NULL;
+    }
+    else if (list->length == 0) {
+        return NULL;
+    }
+    return list->first->next->data;
+}
+
+void* LIST_getLast(LIST list) {
+    if (list == NULL) {
+        return NULL;
+    }
+    else if (list->length == 0) {
+        return NULL;
+    }
+    return list->last->prev->data;
+}
+
+int LIST_getNext(LIST list, void* pDataCurrent, void** pDataNext) {
+    // Check that parameters are not null:
+    if (list == NULL || pDataCurrent == NULL) {
+        DEBUG_PRINT("LIST and/or pDataCurrent given are NULL. Please try again.");
+        pDataNext = NULL;
+        return RETURNCODE_LIST_GETNEXT_LIST_OR_PDATA_NULL;
+    }
+
+    // Iterate over the list and search for pDataCurrent:
+    node_t* iterator = list->first->next;
+    for (int i = 0; i < list->length; ++i){
+        if (iterator->data == pDataCurrent) {
+            break;
+        }
+        iterator = iterator->next;
+    }
+
+    // Check if we found element:
+    if (iterator == list->last) {
+        *pDataNext = NULL;
+        return RETURNCODE_LIST_GETNEXT_CURRENT_ELEMENT_NOT_FOUND;
+    }
+
+    // Check if the element is last in the list (and thus has no next element):
+    if (iterator->next == list->last) {
+        *pDataNext = NULL;
+        return RETURNCODE_LIST_GETNEXT_LAST_ELEMENT;
+    }
+
+    // Set pDataNext to the correct data element pointer:
+    *pDataNext = iterator->next->data;
+    return 0;
+}
+
 int LIST_removeElement(LIST list, void* pDataElement) {
     // Check if list is not null:
     if (list == NULL) {

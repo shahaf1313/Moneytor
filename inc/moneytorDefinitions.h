@@ -1,0 +1,8 @@
+#ifndef MONEYTOR_MONEYTORDEFINITIONS_H
+#define MONEYTOR_MONEYTORDEFINITIONS_H
+
+
+
+#define DEBUG_PRINT(...) {printf(__VA_ARGS__); printf("\n");}
+
+#endif //MONEYTOR_MONEYTORDEFINITIONS_H

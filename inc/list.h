@@ -18,7 +18,10 @@ typedef enum {
     RETURNCODE_LIST_ADDELEMENT_MEMORY_ALLOCATION_FAILED,
     RETURNCODE_LIST_DESTROY_FAILED_TO_FREE_DATA_MEMORY,
     RETURNCODE_LIST_PRINT_LIST_IS_NULL,
-    RETURNCODE_LIST_PRINT_NOT_ALL_ELEMENTS_PRINTED
+    RETURNCODE_LIST_PRINT_NOT_ALL_ELEMENTS_PRINTED,
+    RETURNCODE_LIST_GETNEXT_LIST_OR_PDATA_NULL,
+    RETURNCODE_LIST_GETNEXT_LAST_ELEMENT,
+    RETURNCODE_LIST_GETNEXT_CURRENT_ELEMENT_NOT_FOUND
     } returnCode_t;
 
 /**
@@ -39,6 +42,30 @@ LIST LIST_create(memoryReleaseFunction_t memoryReleaseFunction, getNameFunction_
  * @return length as a positive number on success, else - appropriate returnCode_t.
 **/
 int LIST_getLength(LIST list);
+
+/**
+ * This function returns a pointer to the first data element in the list.
+ * @list [IN] is a LIST instance to get it's first element.
+ * @return pointer to the first element. If list is NULL or that the list is empty - NULL is returned.
+**/
+void* LIST_getFirst(LIST list);
+
+/**
+ * This function returns a pointer to the last data element in the list.
+ * @list [IN] is a LIST instance to get it's last element.
+ * @return pointer to the last element. If list is NULL or that the list is empty - NULL is returned.
+**/
+void* LIST_getLast(LIST list);
+
+/**
+ * This function returns a pointer to the next data element of a given element in the list.
+ * If the element is not on the list, or the element is the last in the list - an appropriate returnCode_t is returned.
+ * @list [IN] is a LIST instance to get it's next element.
+ * @pDataCurrent [IN] is a pointer to a data element from which we want to get the next data element.
+ * @pDataNext [OUT] is an address of a pointer to the next data element.
+ * @return On success - 0, else - appropriate returnCode_t.
+**/
+int LIST_getNext(LIST list, void* pDataCurrent, void** pDataNext);
 
 /**
  * This function removes a specified node from the list.
