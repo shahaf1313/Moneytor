@@ -51,7 +51,7 @@ int releaseMemoryFile(void* pFileInfo_t);
 /**
 * This function releases allocated memory of dirInfo_t.
 * @pDirInfo_t [IN] pointer to dirInfo_t.
-* @return On success - 0, on failure -  appropriate returnCode_t defined in list.h file.
+* @return On success - 0, on failure -  appropriate listReturnCode_t defined in list.h file.
 **/
 int releaseMemoryDir(void* pDirInfo_t);
 
@@ -74,5 +74,14 @@ fileInfo_t* createFileInfo_t(char* name, time_t lastChanged, listDataHandlersEnt
  * @return On success - a valid pointer to dirInfo_t instance, On failure - NULL.
 **/
 dirInfo_t* createDirInfo_t(char* name);
+
+/**
+ * This function copies a fileInfo_t struct and allocates needed memory.
+ * It allocates memory for its own usage. When the user finishes using the struct, he MUST call releaseMemoryFile.
+ * If the input pointer is NULL, nothing happens.
+ * @name [IN] a pointer a valid FileInfo_t struct.
+ * @return On success - a valid pointer to a copied fileInfo_t instance, On failure or if given pointer is NULL - NULL.
+**/
+void* fileInfoCopyFunction(void* pVoidFileInfo);
 
 #endif //MONEYTOR_LISTDATAHANDLERS_H

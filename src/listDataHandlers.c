@@ -62,3 +62,18 @@ dirInfo_t* createDirInfo_t(char* name) {
     }
     return pDirInfo_t;
 }
+
+void* fileInfoCopyFunction(void* pVoidFileInfo) {
+    fileInfo_t* pFileInfo = (fileInfo_t*)pVoidFileInfo;
+    if (pFileInfo == NULL) {
+        return NULL;
+    }
+    fileInfo_t* pNewFileInfo = (fileInfo_t*)malloc(sizeof(*pNewFileInfo));
+    if (pNewFileInfo == NULL) {
+        return NULL;
+    }
+    strcpy(pNewFileInfo->fileName, pFileInfo->fileName);
+    pNewFileInfo->fileType = pFileInfo->fileType;
+    pNewFileInfo->lastChanged = pFileInfo->lastChanged;
+    return (void*)pNewFileInfo;
+}

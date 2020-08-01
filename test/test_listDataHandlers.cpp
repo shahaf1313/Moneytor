@@ -29,7 +29,14 @@ TEST(Sample, dataHandlers_test) {
     std::cout << "\nFile name: " << fileName << "\n";
     std::cout << "Dir name: " << dirName << "\n";
 
+    void* copiedFileInfo = fileInfoCopyFunction((void*)fileInfo);
+    fileInfo_t* copiedFileInfoPtr = (fileInfo_t*)copiedFileInfo;
+    EXPECT_EQ(strcmp(copiedFileInfoPtr->fileName, fileInfo->fileName), 0);
+    EXPECT_EQ(copiedFileInfoPtr->lastChanged, fileInfo->lastChanged);
+    EXPECT_EQ(copiedFileInfoPtr->fileType, fileInfo->fileType);
+
     EXPECT_EQ(releaseMemoryFile((void*)fileInfo), 0);
     EXPECT_EQ(releaseMemoryDir((void*)dirInfo), 0);
+    EXPECT_EQ(releaseMemoryFile((void*)copiedFileInfoPtr), 0);
 
 }

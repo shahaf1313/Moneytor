@@ -6,6 +6,7 @@ extern "C" {
 
 #include "mock.hpp"
 #include "hook.hpp"
+#include <iostream>
 
 #define NODES_NUM 9
 
@@ -18,6 +19,20 @@ int relMem(void* pDataVoid) {
     free(pDataVoid);
     pDataVoid = NULL;
     return 0;
+}
+
+void* copyFunction(void* ptr) {
+    if (ptr == NULL) {
+        return NULL;
+    }
+    data_t* pData = (data_t*)ptr;
+    data_t* pNewData = (data_t*)malloc(sizeof(*pNewData));
+    if (pNewData == NULL) {
+        return NULL;
+    }
+    strcpy(pNewData->name, pData->name);
+    pNewData->num = pData->num;
+    return (void*)pNewData;
 }
 
 char* getName(void* pDataVoid) {
@@ -69,6 +84,12 @@ TEST(Sample, LIST_test) {
     //try to print list:
     EXPECT_EQ(LIST_print(list), 0);
 
+    //copy list and check:
+    LIST copiedList = NULL;
+    EXPECT_EQ(LIST_copyList(&copiedList, list, copyFunction), 0);
+    std::cout << "\nCOPYLIST check - copied list:\n";
+    LIST_print(copiedList);
+
     //try to iterate over the list:
     dummyPtr = LIST_getFirst(list);
     EXPECT_NE(dummyPtr, nullptr);
@@ -102,6 +123,7 @@ TEST(Sample, LIST_test) {
 
     //destroy list:
     EXPECT_EQ(LIST_destroy(list), 0);
+    EXPECT_EQ(LIST_destroy(copiedList), 0);
 
     relMem((void*) pDataArr[NODES_NUM - 1]);
 

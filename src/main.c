@@ -7,12 +7,9 @@ void intHandler(int dummy) {
 }
 
 int main(int argc, char** argv) {
-    return 0;
-}
-    /*
     //Variables declaration:
     char* pFolderPath;
-    LIST fileList = LIST_create(releaseMemoryFile, getFileName);
+    LIST updatedFileList = LIST_create(releaseMemoryFile, getFileName);
     LIST dirList = LIST_create(releaseMemoryDir, getDirName);
 
     //Attach SIGINT to the termination handler:
@@ -21,7 +18,7 @@ int main(int argc, char** argv) {
     //Parse arguments form usr and open the folder's path
     if (argc != 2) {
         printf("Incompatible number of parameters. Usage: Moneytor <folder_path>\n");
-        return -1;
+        return RETURNCODE_MAIN_INVALID_ARGUMENT_NUMBER;
     }
     pFolderPath = argv[1];
     DIR* pDir = opendir(pFolderPath);
@@ -29,66 +26,73 @@ int main(int argc, char** argv) {
     //Open folder and add folder to DirsList:
     if (pDir == NULL) {
         printf("Could not open specified directory. Usage: Monytor <dir_path>.\n");
-        return -2;
+        return RETURNCODE_MAIN_COULDNT_OPEN_GIVEN_FOLDER;
     }
-    dirInfo_t* pDirInfo_t = createDirInfo_t(pFolderPath);
-    if (pDirInfo_t == NULL) {
+    dirInfo_t* pBaseDirInfo = createDirInfo_t(pFolderPath);
+    if (pBaseDirInfo == NULL) {
         printf("Memory allocation falied. Free some memory and try again.\n");
-        return 0;
+        return RETURNCODE_MAIN_MEMORY_ALOOCATION_FAILED;
     }
-    LIST_addElement(dirList, (void*)pDirInfo_t);
+    LIST_addElement(dirList, (void*)pBaseDirInfo);
 
     //Initialize file list for the first time, including all subdir if exists:
-    pDirsList->first->pSubDirList = initList();
-    getFileList(pDir, pDirsList->first->entryName, pDirsList->first->pSubDirList, pDirsList);
+    getFileList(pDir, pBaseDirInfo->dirName, pBaseDirInfo->filesList, dirList);
     closedir(pDir);
-    node_t* pDirIt = pDirsList->first->next;
-    while (pDirIt != NULL) {
-        pDir = opendir(pDirIt->entryName);
+
+    //Set iterator to the second element (if exists) and start scanning dirList:
+    void* pDirInfoIt;
+    LIST_getNext(dirList, pBaseDirInfo, &pDirInfoIt);
+    while (pDirInfoIt != NULL) {
+        dirInfo_t* pCurrentDir = (dirInfo_t*)pDirInfoIt;
+        pDir = opendir(pCurrentDir->dirName);
         if (pDir != NULL) {
             //Whoohoo! Directory exists. Scan files and sub directories:
             //Read new file list:
-            getFileList(pDir, pDirIt->entryName, pDirIt->pSubDirList, pDirsList);
+            getFileList(pDir, pCurrentDir->dirName, pCurrentDir->filesList, dirList);
             //Close directory:
             closedir(pDir);
         } else {
             printf("On initialization, could not print folder to read. FATAL ERROR!\n");
-            return -1;
+            return RETURNCODE_MAIN_COULDNT_OPEN_GIVEN_FOLDER;
         }
-        pDirIt = pDirIt->next;
+        LIST_getNext(dirList, pDirInfoIt, &pDirInfoIt);
     }
-    //DBG: printDirTree(pDirsList);
+    // Check initialization:
+    printDirTree(dirList);
 
     //Start guarding the folder :)
     while (keepRunning) {
         printf("\n====================...Scanning...====================\n");
 
         //Iterate over all directories in the monitored folder:
-        node_t* pDirIt = pDirsList->first;
-        while (pDirIt != NULL) {
-            pDir = opendir(pDirIt->entryName);
+        void* pDirInfoIterator = LIST_getFirst(dirList);
+        while (pDirInfoIterator != NULL) {
+            dirInfo_t* pCurrentDir = (dirInfo_t*)pDirInfoIterator;
+            pDir = opendir(pCurrentDir->dirName);
             if (pDir != NULL) {
                 //Whoohoo! Directory exists. Scan files and sub directories:
                 //Read new file list:
-                getFileList(pDir, pDirIt->entryName, pNewFileList, pDirsList);
+                getFileList(pDir, pCurrentDir->dirName, updatedFileList, dirList);
                 //Close directory:
                 closedir(pDir);
 
                 //Print changes:
-                findDiffNodes(pDirIt->pSubDirList, pNewFileList, "Deleted", FALSE);
-                findDiffNodes(pNewFileList, pDirIt->pSubDirList, "Added", FALSE);
-                findDiffNodes(pDirIt->pSubDirList, pNewFileList, "Updated", TRUE);
+                findDiffNodes(pCurrentDir->filesList, updatedFileList, "Deleted", FALSE);
+                findDiffNodes(updatedFileList, pCurrentDir->filesList, "Added", FALSE);
+                findDiffNodes(pCurrentDir->filesList, updatedFileList, "Updated", TRUE);
 
                 //Swap lists:
-                deleteList(pDirIt->pSubDirList);
-                pDirIt->pSubDirList = pNewFileList;
-                pNewFileList = initList();
-                pDirIt = pDirIt->next;
+                LIST_copyList(&pCurrentDir->filesList, updatedFileList, fileInfoCopyFunction);
+                LIST_destroy(updatedFileList);
+                updatedFileList = LIST_create(releaseMemoryFile, getFileName);
+
+                //Go to next directory:
+                LIST_getNext(dirList, pDirInfoIterator, &pDirInfoIterator);
             } else {
                 //Directory has been deleted. Remove it from dirList and continue to next Directory
-                node_t* tmp = pDirIt->next;
-                removeElement(pDirsList, pDirIt);
-                pDirIt = tmp;
+                void* tmpPtrToDeletedDir = pDirInfoIterator;
+                LIST_getNext(dirList, pDirInfoIterator, &pDirInfoIterator);
+                LIST_removeElement(dirList, tmpPtrToDeletedDir);
             }
         }
 
@@ -98,9 +102,7 @@ int main(int argc, char** argv) {
 
     //Exit properly: close dir, clean memory, etc:
     LIST_destroy(dirList);
-    LIST_destroy(fileList);
+    LIST_destroy(updatedFileList);
     printf("\n\nThanks for choosing Moneytor! Seeya again soon :)\n\n");
     return 0;
 }
-
-*/

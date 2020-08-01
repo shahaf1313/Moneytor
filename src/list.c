@@ -218,6 +218,39 @@ int LIST_addElement(LIST list, void* pData) {
     return 0;
 }
 
+int LIST_copyList(LIST* dest, LIST src, copyFunction_t copyFunction) {
+    if (src == NULL) {
+        DEBUG_PRINT("Parameter src in LIST_copyList is NULL.");
+        return RETURNCODE_LIST_COPYLIST_SRC_IS_NULL;
+    }
+    if (*dest != NULL) {
+        int returnCode = LIST_destroy(*dest);
+        if (returnCode != 0) {
+            DEBUG_PRINT("Could not destroy dest list (which is not NULL) in LIST_copyList. Proper return code has been "
+                        "returned.");
+            return returnCode;
+        }
+    }
+    *dest = LIST_create(src->memoryReleaseFunc, src->getDataNameFunc);
+    if (*dest == NULL) {
+        DEBUG_PRINT("Could not create new LIST instance in LIST_copyList.");
+        return RETURNCODE_LIST_COPYLIST_FAILED_CREATE_NEW_LIST;
+    }
+    node_t* srcListIterator = src->first->next;
+    for (int i = 0; i < src->length; ++i) {
+        void* pNewElement = copyFunction(srcListIterator->data);
+        if(pNewElement == NULL && srcListIterator->data != NULL) {
+            DEBUG_PRINT("Could not copy data element via copyFunction supplied. Not all elements copied!");
+            return RETURNCODE_LIST_COPYLIST_FAILED_TO_COPY_ELEMENT;
+        }
+        LIST_addElement(*dest, pNewElement);
+        srcListIterator = srcListIterator->next;
+    }
+
+    // Success!
+    return 0;
+}
+
 int LIST_destroy(LIST list) {
     // Check if list is not null:
     if (list == NULL) {
