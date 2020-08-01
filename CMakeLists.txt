@@ -11,6 +11,7 @@ include(${CUTIE_DIR}/Cutie.cmake)
 add_cutie_test_target(TEST test/test_list.cpp SOURCES src/list.c)
 add_cutie_test_target(TEST test/test_listDataHandlers.cpp SOURCES src/listDataHandlers.c src/list.c)
 add_cutie_test_target(TEST test/test_utills.cpp SOURCES src/utills.c src/listDataHandlers.c src/list.c)
+add_cutie_all_tests_target()
 
 set(CMAKE_C_STANDARD 99)
 

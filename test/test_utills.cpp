@@ -35,12 +35,42 @@ TEST(Sample, utills_test) {
         for (int j = 0; j < 3; ++j) {
             std::string fileName = "file" + std::to_string(j) + "dir" + std::to_string(i);
             strcpy(tmpName, fileName.c_str());
-            fileInfo* currFile = createFileInfo_t(tmpName, j, "file");
+            fileInfo* currFile = createFileInfo_t(tmpName, j, LIST_DATA_HANDLERS_ENTRY_TYPE_FILE);
             LIST_addElement(currDir->filesList, (void*)currFile);
         }
     }
-    //print dir tree:
+    //check printDirTree:
     printDirTree(dirList);
+    EXPECT_EQ(LIST_destroy(dirList), 0);
+    EXPECT_EQ(LIST_destroy(fileList), 0);
+
+    //check getFileList:
+    dirList = LIST_create(releaseMemoryDir, getDirName);
+    char folder[MAX_PATH_LENGTH] = "/mnt/c/Users/Shahaf/CLionProjects/Moneytor/test/testUtillsFolder";
+    dirInfo_t* pDirInfo_t = createDirInfo_t(folder);
+    LIST_addElement(dirList, (void*)pDirInfo_t);
+    DIR* pDir = opendir(folder);
+    int filesNum = getFileList(pDir, folder, pDirInfo_t->filesList, dirList);
+    printDirTree(dirList);
+    EXPECT_EQ(filesNum, 8);
+
+    //check findDiffNodes:
+    fileList = LIST_create(releaseMemoryFile, getFileName);
+    //get another copy to fileList:
+    getFileList(pDir, folder, fileList, dirList);
+    //remove one element:
+    LIST_removeElement(fileList, LIST_getLast(fileList));
+    //add another:
+    fileInfo_t* newHakitsyFile = createFileInfo_t("Hakitsy", 0, LIST_DATA_HANDLERS_ENTRY_TYPE_FILE);
+    LIST_addElement(fileList, (void*)newHakitsyFile);
+    LIST_print(fileList);
+    LIST_print(pDirInfo_t->filesList);
+    //compare with findDiffs:
+    DEBUG_PRINT("\nremoved dir2, added Hakitsy. lets check:");
+    findDiffNodes(pDirInfo_t->filesList, fileList, "Deleted", FALSE);
+    findDiffNodes(fileList, pDirInfo_t->filesList, "Added", FALSE);
+    //destroy lists and dir:
+    closedir(pDir);
     EXPECT_EQ(LIST_destroy(dirList), 0);
     EXPECT_EQ(LIST_destroy(fileList), 0);
 }

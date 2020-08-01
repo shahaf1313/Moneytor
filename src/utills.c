@@ -1,19 +1,25 @@
 #include "inc/utills.h"
 
+static time_t getEntryLastChanged(char* entryFullPath);
+static void getEntryFullPath(char* currentWorkingDirectory, char* entryName, char* entryFullPath);
+static listDataHandlersEntryType_t getEntryType(struct dirent* pd, char* entryFullPath, LIST dirList);
+static void newDirFoundHandler(char* newDirFullPath, LIST dirList);
+
 // This function makes a delay of ms milliseconds
 void delay(unsigned int ms) {
     unsigned int clocks = CLOCKS_PER_SEC * ms / 1000;
     clock_t stopTime = clocks + clock();
     while (stopTime > clock());
 }
-/*
+
 // This function receives pointer to a directory and stores each entry in a string array (future - list)
-int getFileList(DIR* pDir, char* fullDirPath, LIST fileList, LIST dirList) {
-    struct stat status;
+int getFileList(DIR* pDir, char* currentWorkingDirectory, LIST fileList, LIST dirList) {
     struct dirent* pDirent;
     time_t lastChanged;
-    char* pFileType, entryName[MAX_PATH_LENGTH];
+    listDataHandlersEntryType_t fileType;
+    char entryFullPath[MAX_PATH_LENGTH];
     int i = 0;
+
     rewinddir(pDir);
     while ((pDirent = readdir(pDir)) != NULL) {
         //Skip self and father folder:
@@ -21,22 +27,14 @@ int getFileList(DIR* pDir, char* fullDirPath, LIST fileList, LIST dirList) {
             continue;
         }
 
-        //Get entry's full path:
-        strcpy(entryName, fullDirPath);
-        strcat(entryName, "/");
-        strcat(entryName, pDirent->d_name);
+        // Get entry's properties:
+        getEntryFullPath(currentWorkingDirectory, pDirent->d_name, entryFullPath);
+        fileType = getEntryType(pDirent, entryFullPath, dirList);
+        lastChanged = getEntryLastChanged(entryFullPath);
 
-        //Get entry's type and full path:
-        pFileType = getEntryType(pDirent, pDirList, entryName);
-
-        //Check entry's last changed time:
-        if (stat(entryName, &status) == -1) {
-            printf("Could not read status of entry: %s. Please check permitions and try again.", pDirent->d_name);
-            lastChanged = 0;
-        } else {
-            lastChanged = status.st_atim.tv_sec;
-        }
-        addElement(pFileList, entryName, lastChanged, pFileType);
+        // Add entry to current fileList:
+        fileInfo_t* pFileInfo_t = createFileInfo_t(entryFullPath, lastChanged, fileType);
+        LIST_addElement(fileList, (void*)pFileInfo_t);
         ++i;
 
         //dbg: printf("[%s], %s, last changed in %s\n", pDirent->d_name, pFileType,  asctime(gmtime(&lastChanged)));
@@ -44,93 +42,89 @@ int getFileList(DIR* pDir, char* fullDirPath, LIST fileList, LIST dirList) {
     return i;
 }
 
-// This function gets two arrays lists of strings and prints all the strings that differ from the first
-*
-list to
-the second, with
-
-the strToPrint(Added
-
-/Deleted)
-
-void findDiffNodes(LIST original, LIST updated, char* strToPrint, int updateCheck) {
-    int foundFile;
-    node_t* pOriginalNode = original->first, * pUpdatedNode;
-    while (pOriginalNode != NULL) {
-        foundFile = FALSE;
-        pUpdatedNode = updated->first;
-
-        while (pUpdatedNode != NULL) {
-            if (strcmp(pOriginalNode->entryName, pUpdatedNode->entryName) == 0) {
-                foundFile = TRUE;
-                break;
-            }
-            pUpdatedNode = pUpdatedNode->next;
-        }
-
-        if (!updateCheck && !foundFile) {
-            printf("File %s %s!\n", pOriginalNode->entryName, strToPrint);
-        } else if (updateCheck && foundFile) {
-            if (pOriginalNode->lastChanged - pUpdatedNode->lastChanged != 0)
-                printf("File %s %s!\n", pOriginalNode->entryName, strToPrint);
-        }
-
-        pOriginalNode = pOriginalNode->next;
+static void getEntryFullPath(char* currentWorkingDirectory, char* entryName, char* entryFullPath) {
+    strcpy(entryFullPath, currentWorkingDirectory);
+    if(strlen(entryFullPath) > 1 && entryFullPath[strlen(entryFullPath)-1] != '/' && entryFullPath[strlen(entryFullPath)-1] != '\\') {
+        strcat(entryFullPath, "/");
     }
+    strcat(entryFullPath, entryName);
 }
 
 // This function receives an entry in a folder and returns it's type and full path.
-*
-If the
-current entry
-is a
-directory,
-the function
-searches it
-in dirList
-and if
-it doen
-'t exists, adds it to the list.
-
-char* getEntryType(struct dirent* pd, LIST dirList, char* entryName) {
-    char* pFileType;
+// If the current entry is a directory, the function searches it in dirList and if it doen't exists, adds it to the list.
+listDataHandlersEntryType_t getEntryType(struct dirent* pd, char* entryFullPath, LIST dirList) {
+    listDataHandlersEntryType_t fileType;
     switch (pd->d_type) {
         case DT_REG:
-            pFileType = "File";
+            fileType = LIST_DATA_HANDLERS_ENTRY_TYPE_FILE;
             break;
         case DT_DIR:
-            pFileType = "Directory";
-            //Check if directory exists in DirsList, and if not - add it!
-            node_t* pDirIt = pDirList->first;
-            while (pDirIt != NULL) {
-                if (strcmp(entryName, pDirIt->entryName) == 0) {
-                    break;
-                }
-                pDirIt = pDirIt->next;
-            }
-            //If pDirIt is NULL - you didn't find any directory in DirsList that matches to this dir.
-            *Thus, it
-            is
-                    a
-            new
-                    sub
-            directory.Add
-            it
-                    to
-            DirsList
-            !
-            if (pDirIt == NULL && (pDirList->counter > 0)) {
-                addElement(pDirList, entryName, 0, pFileType);
-                pDirList->last->pSubDirList = initList();
-            }
+            fileType = LIST_DATA_HANDLERS_ENTRY_TYPE_DIRECTORY;
+            newDirFoundHandler(entryFullPath, dirList);
             break;
         default:
-            pFileType = "Unknown";
+            fileType = LIST_DATA_HANDLERS_ENTRY_TYPE_UNKNNOWN;
             break;
     }
-    return pFileType;
+    return fileType;
 }
-*/
+
+static void newDirFoundHandler(char* newDirFullPath, LIST dirList) {
+    //Check if directory exists in DirsList, and if not - add it!
+    void* pDirIt = LIST_getFirst(dirList);
+    int dirListLength = LIST_getLength(dirList), i;
+    for (i = 0; i < dirListLength; ++i)
+    {
+        if (strcmp(newDirFullPath, ((dirInfo_t*)pDirIt)->dirName) == 0) {
+            break;
+        }
+        LIST_getNext(dirList, pDirIt, &pDirIt);
+    }
+
+    //If we reached to the end of our for loop - we found a new dir! If so, add it to dirList:
+    if (dirListLength > 0 && i == dirListLength) {
+        dirInfo_t* pDirInfo_t = createDirInfo_t(newDirFullPath);
+        LIST_addElement(dirList, (void*)pDirInfo_t);
+    }
+}
+
+static time_t getEntryLastChanged(char* entryFullPath) {
+    struct stat status;
+    if (stat(entryFullPath, &status) == -1) {
+        DEBUG_PRINT("Could not read status of entry: %s. Please check permitions and try again.", entryFullPath);
+        return 0;
+    }
+    return status.st_atim.tv_sec;
+}
+
+// This function gets two arrays lists of strings and prints all the strings that differ from the first
+// list to the second, with the strToPrint (Added/Deleted)
+void findDiffNodes(LIST original, LIST updated, char* strToPrint, int updateCheck) {
+    int foundFile;
+    void* originalData = LIST_getFirst(original);
+    void* updatedData;
+    int originalLength = LIST_getLength(original), updatedLength = LIST_getLength(updated);
+    for (int i = 0; i < originalLength; ++i) {
+        foundFile = FALSE;
+        updatedData = LIST_getFirst(updated);
+        for (int j = 0; j < updatedLength; ++j) {
+            if (strcmp( ((fileInfo_t*)originalData)->fileName, ((fileInfo_t*)updatedData)->fileName) == 0) {
+                foundFile = TRUE;
+                break;
+            }
+            LIST_getNext(updated, updatedData, &updatedData);
+        }
+
+        if (!updateCheck && !foundFile) {
+            DEBUG_PRINT("File %s %s!", ((fileInfo_t*)originalData)->fileName, strToPrint);
+        } else if (updateCheck && foundFile) {
+            if (((fileInfo_t*)originalData)->lastChanged - ((fileInfo_t*)updatedData)->lastChanged != 0)
+            DEBUG_PRINT("File %s %s!", ((fileInfo_t*)originalData)->fileName, strToPrint);
+        }
+        LIST_getNext(original, originalData, &originalData);
+    }
+}
+
 // This function prints the entire tree of files and subfolders in dirList
 void printDirTree(LIST dirList) {
     DEBUG_PRINT("**********************************************PrintDirTree**********************************************\n\n");

@@ -1,5 +1,4 @@
 #include "inc/main.h"
-#include "inc/utills.h"
 
 static volatile int keepRunning = 1;
 

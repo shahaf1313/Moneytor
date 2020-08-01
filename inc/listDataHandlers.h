@@ -8,12 +8,17 @@
 #include "inc/list.h"
 
 #define MAX_PATH_LENGTH 255
-#define MAX_TYPE_LENGTH 10
+
+typedef enum {
+    LIST_DATA_HANDLERS_ENTRY_TYPE_FILE = 1,
+    LIST_DATA_HANDLERS_ENTRY_TYPE_DIRECTORY,
+    LIST_DATA_HANDLERS_ENTRY_TYPE_UNKNNOWN
+} listDataHandlersEntryType_t;
 
 typedef struct fileInfo {
     char fileName[MAX_PATH_LENGTH];
     time_t lastChanged;
-    char fileType[MAX_TYPE_LENGTH];
+    listDataHandlersEntryType_t fileType;
 } fileInfo_t;
 
 typedef struct dirInfo {
@@ -56,10 +61,10 @@ int releaseMemoryDir(void* pDirInfo_t);
  * in order to free all allocated memory.
  * @name [IN] a pointer to a string that contains file's name. MUST be smaller or equal length to MAX_PATH_LENGTH.
  * @lastChanged [IN] time_t carries the last time that the file changed.
- * @fileType [IN] a pointer to a string that contains file's type. MUST be smaller or equal length to MAX_TYPE_LENGTH.
+ * @fileType [IN] listDataHandlersEntryType_t that contains file's type.
  * @return On success - a valid pointer to fileInfo_t instance, On failure - NULL.
 **/
-fileInfo_t* createFileInfo_t(char* name, time_t lastChanged, char* fileType);
+fileInfo_t* createFileInfo_t(char* name, time_t lastChanged, listDataHandlersEntryType_t fileType);
 
 /**
  * This function creates dirInfo_t.

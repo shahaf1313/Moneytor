@@ -1,5 +1,28 @@
 #include "inc/list.h"
-#include "inc/list_private.h"
+
+// Private structs and definitions:
+
+// CR: (SE) This line is duplicated from moneytorDefinitions.h in order to allow separate debugging printer of each
+// CR: (SE) module (list is not a part of moneytor and vice versa).
+#define DEBUG_PRINT(...) {printf(__VA_ARGS__); printf("\n");}
+
+typedef struct node node_t;
+
+struct node {
+    struct node* prev;
+    struct node* next;
+    void* data;
+};
+
+struct list {
+    int (*memoryReleaseFunc)(void*);
+    char* (*getDataNameFunc)(void*);
+    node_t* first;
+    struct node* last;
+    int length;
+};
+
+//Functions:
 
 LIST LIST_create(memoryReleaseFunction_t memoryReleaseFunction, getNameFunction_t getNameFunction) {
     LIST list = (list_t*) malloc(sizeof(*list));

@@ -5,21 +5,20 @@
 #include <time.h>
 #include <dirent.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <string.h>
 #include "inc/moneytorDefinitions.h"
-#include "inc/list.h"
 #include "inc/listDataHandlers.h"
+
+#define TRUE 1
+#define FALSE 0
 
 //todo: document functions!
 
 void delay(unsigned int ms);
 
-int getFileList(DIR* pDir, char* fullDirPath, LIST fileList, LIST dirList);
+int getFileList(DIR* pDir, char* currentWorkingDirectory, LIST fileList, LIST dirList);
 
 void findDiffNodes(LIST original, LIST updated, char* strToPrint, int updateCheck);
-
-char* getEntryType(struct dirent* pd, LIST dirList, char* entryName);
 
 void printDirTree(LIST dirList);
 

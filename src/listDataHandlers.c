@@ -34,7 +34,7 @@ int releaseMemoryDir(void* pDirInfo_t) {
     return 0;
 }
 
-fileInfo_t* createFileInfo_t(char* name, time_t lastChanged, char* fileType) {
+fileInfo_t* createFileInfo_t(char* name, time_t lastChanged, listDataHandlersEntryType_t fileType) {
     fileInfo_t* pFileInfo_t = (fileInfo_t*)malloc(sizeof(*pFileInfo_t));
     if (pFileInfo_t == NULL) {
         printf("Memory allocation failed in createFileInfo_t function. Free memory and try again.\n");
@@ -42,7 +42,7 @@ fileInfo_t* createFileInfo_t(char* name, time_t lastChanged, char* fileType) {
     }
     //todo: check if name and file type are MAX_PATH_LENGTH. if bigger - return flase.
     strcpy(pFileInfo_t->fileName, name);
-    strcpy(pFileInfo_t->fileType, fileType);
+    pFileInfo_t->fileType = fileType;
     pFileInfo_t->lastChanged = lastChanged;
     return pFileInfo_t;
 }

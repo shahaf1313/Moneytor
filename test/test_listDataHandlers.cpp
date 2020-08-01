@@ -12,7 +12,7 @@ using namespace testing;
 
 TEST(Sample, dataHandlers_test) {
     //create fileInfo:
-    fileInfo_t* fileInfo = createFileInfo_t("fileHakitsy", 0, "file");
+    fileInfo_t* fileInfo = createFileInfo_t("fileHakitsy", 0, LIST_DATA_HANDLERS_ENTRY_TYPE_FILE);
     EXPECT_NE(fileInfo, nullptr);
 
     //create dirInfo:
