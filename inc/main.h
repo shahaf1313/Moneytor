@@ -5,7 +5,7 @@
 #include <string.h>
 #include <signal.h>
 #include "inc/utills.h"
- #include "inc/moneytorDefinitions.h"
+#include "inc/moneytorDefinitions.h"
 
 #define SLEEP_TIME_SEC 10
 

@@ -11,27 +11,31 @@ int main(int argc, char** argv) {
     char* pFolderPath;
     LIST updatedFileList = LIST_create(releaseMemoryFile, getFileName);
     LIST dirList = LIST_create(releaseMemoryDir, getDirName);
+    int returnCodeMain = 0;
 
     //Attach SIGINT to the termination handler:
     signal(SIGINT, intHandler);
 
     //Parse arguments form usr and open the folder's path
     if (argc != 2) {
-        printf("Incompatible number of parameters. Usage: Moneytor <folder_path>\n");
-        return RETURNCODE_MAIN_INVALID_ARGUMENT_NUMBER;
+        DEBUG_PRINT("Incompatible number of parameters. Usage: Moneytor <folder_path>");
+        returnCodeMain = RETURNCODE_MAIN_INVALID_ARGUMENT_NUMBER;
+        goto exit;
     }
     pFolderPath = argv[1];
     DIR* pDir = opendir(pFolderPath);
 
     //Open folder and add folder to DirsList:
     if (pDir == NULL) {
-        printf("Could not open specified directory. Usage: Monytor <dir_path>.\n");
-        return RETURNCODE_MAIN_COULDNT_OPEN_GIVEN_FOLDER;
+        DEBUG_PRINT("Could not open specified directory. Usage: Monytor <dir_path>.");
+        returnCodeMain = RETURNCODE_MAIN_COULDNT_OPEN_GIVEN_FOLDER;
+        goto exit;
     }
     dirInfo_t* pBaseDirInfo = createDirInfo_t(pFolderPath);
     if (pBaseDirInfo == NULL) {
-        printf("Memory allocation falied. Free some memory and try again.\n");
-        return RETURNCODE_MAIN_MEMORY_ALOOCATION_FAILED;
+        DEBUG_PRINT("Memory allocation falied. Free some memory and try again.");
+        returnCodeMain = RETURNCODE_MAIN_MEMORY_ALOOCATION_FAILED;
+        goto exit;
     }
     LIST_addElement(dirList, (void*)pBaseDirInfo);
 
@@ -47,22 +51,19 @@ int main(int argc, char** argv) {
         pDir = opendir(pCurrentDir->dirName);
         if (pDir != NULL) {
             //Whoohoo! Directory exists. Scan files and sub directories:
-            //Read new file list:
             getFileList(pDir, pCurrentDir->dirName, pCurrentDir->filesList, dirList);
-            //Close directory:
             closedir(pDir);
         } else {
-            printf("On initialization, could not print folder to read. FATAL ERROR!\n");
-            return RETURNCODE_MAIN_COULDNT_OPEN_GIVEN_FOLDER;
+            DEBUG_PRINT("On initialization, could not print folder to read. FATAL ERROR!");
+            returnCodeMain = RETURNCODE_MAIN_COULDNT_OPEN_GIVEN_FOLDER;
+            goto exit;
         }
         LIST_getNext(dirList, pDirInfoIt, &pDirInfoIt);
     }
-    // Check initialization:
-    printDirTree(dirList);
 
     //Start guarding the folder :)
     while (keepRunning) {
-        printf("\n====================...Scanning...====================\n");
+        DEBUG_PRINT("\n====================...Scanning...====================");
 
         //Iterate over all directories in the monitored folder:
         void* pDirInfoIterator = LIST_getFirst(dirList);
@@ -71,9 +72,7 @@ int main(int argc, char** argv) {
             pDir = opendir(pCurrentDir->dirName);
             if (pDir != NULL) {
                 //Whoohoo! Directory exists. Scan files and sub directories:
-                //Read new file list:
                 getFileList(pDir, pCurrentDir->dirName, updatedFileList, dirList);
-                //Close directory:
                 closedir(pDir);
 
                 //Print changes:
@@ -100,9 +99,10 @@ int main(int argc, char** argv) {
         delay(SLEEP_TIME_SEC * 1000);
     }
 
-    //Exit properly: close dir, clean memory, etc:
+    //Exit properly: clean memory mainly -
+    exit:
     LIST_destroy(dirList);
     LIST_destroy(updatedFileList);
-    printf("\n\nThanks for choosing Moneytor! Seeya again soon :)\n\n");
-    return 0;
+    DEBUG_PRINT("\n\nThanks for choosing Moneytor! Seeya again soon :)\n");
+    return returnCodeMain;
 }

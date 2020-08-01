@@ -35,12 +35,15 @@ int releaseMemoryDir(void* pDirInfo_t) {
 }
 
 fileInfo_t* createFileInfo_t(char* name, time_t lastChanged, listDataHandlersEntryType_t fileType) {
-    fileInfo_t* pFileInfo_t = (fileInfo_t*)malloc(sizeof(*pFileInfo_t));
-    if (pFileInfo_t == NULL) {
-        printf("Memory allocation failed in createFileInfo_t function. Free memory and try again.\n");
+    if (strlen(name) > MAX_PATH_LENGTH) {
+        DEBUG_PRINT("File name exceeds MAX_PATH_LENGTH in createFileInfo_t. Memory was not allocated. Returning NULL.");
         return NULL;
     }
-    //todo: check if name and file type are MAX_PATH_LENGTH. if bigger - return flase.
+    fileInfo_t* pFileInfo_t = (fileInfo_t*)malloc(sizeof(*pFileInfo_t));
+    if (pFileInfo_t == NULL) {
+        DEBUG_PRINT("Memory allocation failed in createFileInfo_t function. Free memory and try again.\n");
+        return NULL;
+    }
     strcpy(pFileInfo_t->fileName, name);
     pFileInfo_t->fileType = fileType;
     pFileInfo_t->lastChanged = lastChanged;
@@ -48,12 +51,15 @@ fileInfo_t* createFileInfo_t(char* name, time_t lastChanged, listDataHandlersEnt
 }
 
 dirInfo_t* createDirInfo_t(char* name) {
+    if (strlen(name) > MAX_PATH_LENGTH) {
+        DEBUG_PRINT("Directory name exceeds MAX_PATH_LENGTH in createDirInfo_t. Memory was not allocated. Returning NULL.");
+        return NULL;
+    }
     dirInfo_t* pDirInfo_t = (dirInfo_t*)malloc(sizeof(*pDirInfo_t));
     if (pDirInfo_t == NULL) {
         DEBUG_PRINT("Memory allocation failed in createDirInfo_t function. Free memory and try again.");
         return NULL;
     }
-    //todo: check if name is MAX_PATH_LENGTH. if bigger - return flase.
     strcpy(pDirInfo_t->dirName, name);
     pDirInfo_t->filesList = LIST_create(releaseMemoryFile, getFileName);
     if (pDirInfo_t->filesList == NULL) {

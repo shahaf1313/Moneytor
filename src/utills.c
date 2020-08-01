@@ -1,18 +1,44 @@
 #include "inc/utills.h"
-
+/**
+ * @brief This function returns the last changed time_t of an spicified entry.
+ * @param entryFullPath [IN] entry's full path.
+ * @return entry's last changed time in time_t format.
+ */
 static time_t getEntryLastChanged(char* entryFullPath);
+
+/**
+ * @brief This function create a full path to an entry using it's directory and name.
+ * @param currentWorkingDirectory [IN] directory full path.
+ * @param entryName [IN] entry's name.
+ * @param entryFullPath [OUT] entry's full path.
+ */
 static void getEntryFullPath(char* currentWorkingDirectory, char* entryName, char* entryFullPath);
+
+/**
+ * @brief This function gets path to an entry and returns it's type (file/dir/unknown) using the
+ * listDataHandlersEntryType_t enum. if the function finds out that current entry is a directory - it calls
+ * newDirFoundHandler for ferther proccesing.
+ * @param pd [IN] entry's Dirent struct (after opened via opendir() and iterated via readdir()).
+ * @param entryFullPath [IN] entry's full path.
+ * @param dirList [IN] directory list in case of encountering new directory.
+ * @return entry's type via listDataHandlersEntryType_t enum.
+ */
 static listDataHandlersEntryType_t getEntryType(struct dirent* pd, char* entryFullPath, LIST dirList);
+
+/**
+ * @brief This function handles encountering a new directory while iterating the current directory.
+ * If directory doesn't exists in dirList, the function adds it to dirList.
+ * @param newDirFullPath [IN] directory's full path.
+ * @param dirList [IN,OUT] directory list to search in.
+ */
 static void newDirFoundHandler(char* newDirFullPath, LIST dirList);
 
-// This function makes a delay of ms milliseconds
 void delay(unsigned int ms) {
     unsigned int clocks = CLOCKS_PER_SEC * ms / 1000;
     clock_t stopTime = clocks + clock();
     while (stopTime > clock());
 }
 
-// This function receives pointer to a directory and stores each entry in a string array (future - list)
 int getFileList(DIR* pDir, char* currentWorkingDirectory, LIST fileList, LIST dirList) {
     struct dirent* pDirent;
     time_t lastChanged;
@@ -36,8 +62,6 @@ int getFileList(DIR* pDir, char* currentWorkingDirectory, LIST fileList, LIST di
         fileInfo_t* pFileInfo_t = createFileInfo_t(entryFullPath, lastChanged, fileType);
         LIST_addElement(fileList, (void*)pFileInfo_t);
         ++i;
-
-        //dbg: printf("[%s], %s, last changed in %s\n", pDirent->d_name, pFileType,  asctime(gmtime(&lastChanged)));
     }
     return i;
 }
@@ -50,8 +74,6 @@ static void getEntryFullPath(char* currentWorkingDirectory, char* entryName, cha
     strcat(entryFullPath, entryName);
 }
 
-// This function receives an entry in a folder and returns it's type and full path.
-// If the current entry is a directory, the function searches it in dirList and if it doen't exists, adds it to the list.
 listDataHandlersEntryType_t getEntryType(struct dirent* pd, char* entryFullPath, LIST dirList) {
     listDataHandlersEntryType_t fileType;
     switch (pd->d_type) {
@@ -97,8 +119,6 @@ static time_t getEntryLastChanged(char* entryFullPath) {
     return status.st_atim.tv_sec;
 }
 
-// This function gets two arrays lists of strings and prints all the strings that differ from the first
-// list to the second, with the strToPrint (Added/Deleted)
 void findDiffNodes(LIST original, LIST updated, char* strToPrint, int updateCheck) {
     int foundFile;
     void* originalData = LIST_getFirst(original);
@@ -125,7 +145,6 @@ void findDiffNodes(LIST original, LIST updated, char* strToPrint, int updateChec
     }
 }
 
-// This function prints the entire tree of files and subfolders in dirList
 void printDirTree(LIST dirList) {
     DEBUG_PRINT("**********************************************PrintDirTree**********************************************\n\n");
     DEBUG_PRINT("List of all subDirs:\n");

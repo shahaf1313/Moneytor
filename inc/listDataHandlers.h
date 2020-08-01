@@ -26,61 +26,60 @@ typedef struct dirInfo {
     LIST filesList;
 } dirInfo_t;
 
-//todo: document functions!
 /**
- * This function gets fileInfo_t's name.
- * @pFileInfo_t [IN] pointer to fileInfo_t.
- * @return On success - pointer to the name string, on failure - NULL.
+ * @brief This function gets fileInfo_t's name.
+ * @param pFileInfo_t [IN] pointer to fileInfo_t.
+ * @returns On success - pointer to the name string, on failure - NULL.
 **/
 char* getFileName(void* pFileInfo_t);
 
 /**
- * This function gets fileInfo_t's name.
- * @pDirInfo_t [IN] pointer to dirInfo_t.
- * @return On success - pointer to the name string, on failure - NULL.
+ * @brief This function gets fileInfo_t's name.
+ * @param pDirInfo_t [IN] pointer to dirInfo_t.
+ * @returns On success - pointer to the name string, on failure - NULL.
 **/
 char* getDirName(void* pDirInfo_t);
 
 /**
- * This function releases allocated memory of fileInfo_t.
- * @pFileInfo_t [IN] pointer to fileInfo_t.
- * @return On success - 0,
+ * @brief This function releases allocated memory of fileInfo_t.
+ * @param pFileInfo_t [IN] pointer to fileInfo_t.
+ * @returns On success - 0,
 **/
 int releaseMemoryFile(void* pFileInfo_t);
 
 /**
-* This function releases allocated memory of dirInfo_t.
-* @pDirInfo_t [IN] pointer to dirInfo_t.
-* @return On success - 0, on failure -  appropriate listReturnCode_t defined in list.h file.
+* @brief This function releases allocated memory of dirInfo_t.
+* @param pDirInfo_t [IN] pointer to dirInfo_t.
+* @returns On success - 0, on failure -  appropriate listReturnCode_t defined in list.h file.
 **/
 int releaseMemoryDir(void* pDirInfo_t);
 
 /**
- * This function creates fileInfo_t.
+ * @brief This function creates fileInfo_t.
  * It allocates memory for its own usage. When the user finishes using the struct, he MUST call releaseMemoryFile
  * in order to free all allocated memory.
- * @name [IN] a pointer to a string that contains file's name. MUST be smaller or equal length to MAX_PATH_LENGTH.
- * @lastChanged [IN] time_t carries the last time that the file changed.
- * @fileType [IN] listDataHandlersEntryType_t that contains file's type.
- * @return On success - a valid pointer to fileInfo_t instance, On failure - NULL.
+ * @param name [IN] a pointer to a string that contains file's name. MUST be smaller or equal length to MAX_PATH_LENGTH.
+ * @param lastChanged [IN] time_t carries the last time that the file changed.
+ * @param fileType [IN] listDataHandlersEntryType_t that contains file's type.
+ * @returns On success - a valid pointer to fileInfo_t instance, On failure - NULL.
 **/
 fileInfo_t* createFileInfo_t(char* name, time_t lastChanged, listDataHandlersEntryType_t fileType);
 
 /**
- * This function creates dirInfo_t.
+ * @brief This function creates dirInfo_t.
  * It allocates memory for its own usage. When the user finishes using the struct, he MUST call releaseMemoryDir
  * in order to free all allocated memory.
- * @name [IN] a pointer to a string that contains dir's name. MUST be smaller or equal length to MAX_PATH_LENGTH.
- * @return On success - a valid pointer to dirInfo_t instance, On failure - NULL.
+ * @param name [IN] a pointer to a string that contains dir's name. MUST be smaller or equal length to MAX_PATH_LENGTH.
+ * @returns On success - a valid pointer to dirInfo_t instance, On failure - NULL.
 **/
 dirInfo_t* createDirInfo_t(char* name);
 
 /**
- * This function copies a fileInfo_t struct and allocates needed memory.
+ * @brief This function copies a fileInfo_t struct and allocates needed memory.
  * It allocates memory for its own usage. When the user finishes using the struct, he MUST call releaseMemoryFile.
  * If the input pointer is NULL, nothing happens.
- * @name [IN] a pointer a valid FileInfo_t struct.
- * @return On success - a valid pointer to a copied fileInfo_t instance, On failure or if given pointer is NULL - NULL.
+ * @param name [IN] a pointer a valid FileInfo_t struct.
+ * @returns On success - a valid pointer to a copied fileInfo_t instance, On failure or if given pointer is NULL - NULL.
 **/
 void* fileInfoCopyFunction(void* pVoidFileInfo);
 
