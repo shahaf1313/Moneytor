@@ -2,14 +2,14 @@
 #include "inc/list.h"
 
 char* getFileName(void* pFileInfo_t) {
-    if (pFileInfo_t == NULL) {
+    if (NULL == pFileInfo_t) {
         return  NULL;
     }
     return ((fileInfo_t*)pFileInfo_t)->fileName;
 }
 
 char* getDirName(void* pDirInfo_t) {
-    if (pDirInfo_t == NULL) {
+    if (NULL == pDirInfo_t) {
         return NULL;
     }
     return ((dirInfo_t*)pDirInfo_t)->dirName;
@@ -24,7 +24,7 @@ int releaseMemoryFile(void* pFileInfo_t) {
 int releaseMemoryDir(void* pDirInfo_t) {
     dirInfo_t* pDirInfo = (dirInfo_t*)pDirInfo_t;
     int returnCode = LIST_destroy(pDirInfo->filesList);
-    if ( returnCode != 0) {
+    if (RETURNCODE_SUCCESS != returnCode) {
         DEBUG_PRINT("Could not destroy subDirsList in dirInfo_t's releaseMemory function. "
                     "Return code has been returned, and memory of dirInfo_t WAS NOT RELEASED.");
         return returnCode;
@@ -40,7 +40,7 @@ fileInfo_t* createFileInfo_t(char* name, time_t lastChanged, listDataHandlersEnt
         return NULL;
     }
     fileInfo_t* pFileInfo_t = (fileInfo_t*)malloc(sizeof(*pFileInfo_t));
-    if (pFileInfo_t == NULL) {
+    if (NULL == pFileInfo_t) {
         DEBUG_PRINT("Memory allocation failed in createFileInfo_t function. Free memory and try again.\n");
         return NULL;
     }
@@ -56,13 +56,13 @@ dirInfo_t* createDirInfo_t(char* name) {
         return NULL;
     }
     dirInfo_t* pDirInfo_t = (dirInfo_t*)malloc(sizeof(*pDirInfo_t));
-    if (pDirInfo_t == NULL) {
+    if (NULL == pDirInfo_t) {
         DEBUG_PRINT("Memory allocation failed in createDirInfo_t function. Free memory and try again.");
         return NULL;
     }
     strcpy(pDirInfo_t->dirName, name);
     pDirInfo_t->filesList = LIST_create(releaseMemoryFile, getFileName);
-    if (pDirInfo_t->filesList == NULL) {
+    if (NULL == pDirInfo_t->filesList) {
         DEBUG_PRINT("LIST_create failed in createDirInfo_t function. Free memory and try again.");
         return NULL;
     }
@@ -71,11 +71,11 @@ dirInfo_t* createDirInfo_t(char* name) {
 
 void* fileInfoCopyFunction(void* pVoidFileInfo) {
     fileInfo_t* pFileInfo = (fileInfo_t*)pVoidFileInfo;
-    if (pFileInfo == NULL) {
+    if (NULL == pFileInfo) {
         return NULL;
     }
     fileInfo_t* pNewFileInfo = (fileInfo_t*)malloc(sizeof(*pNewFileInfo));
-    if (pNewFileInfo == NULL) {
+    if (NULL == pNewFileInfo) {
         return NULL;
     }
     strcpy(pNewFileInfo->fileName, pFileInfo->fileName);

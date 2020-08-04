@@ -11,13 +11,13 @@ int main(int argc, char** argv) {
     char* pFolderPath;
     LIST updatedFileList = LIST_create(releaseMemoryFile, getFileName);
     LIST dirList = LIST_create(releaseMemoryDir, getDirName);
-    int returnCodeMain = 0;
+    returnCode_t returnCodeMain = RETURNCODE_MAIN_UNINITIALIZED, dirListReturnCode, fileListReturnCode;
 
     //Attach SIGINT to the termination handler:
     signal(SIGINT, intHandler);
 
     //Parse arguments form usr and open the folder's path
-    if (argc != 2) {
+    if (2 != argc) {
         DEBUG_PRINT("Incompatible number of parameters. Usage: Moneytor <folder_path>");
         returnCodeMain = RETURNCODE_MAIN_INVALID_ARGUMENT_NUMBER;
         goto exit;
@@ -26,13 +26,13 @@ int main(int argc, char** argv) {
     DIR* pDir = opendir(pFolderPath);
 
     //Open folder and add folder to DirsList:
-    if (pDir == NULL) {
+    if (NULL == pDir) {
         DEBUG_PRINT("Could not open specified directory. Usage: Monytor <dir_path>.");
         returnCodeMain = RETURNCODE_MAIN_COULDNT_OPEN_GIVEN_FOLDER;
         goto exit;
     }
     dirInfo_t* pBaseDirInfo = createDirInfo_t(pFolderPath);
-    if (pBaseDirInfo == NULL) {
+    if (NULL == pBaseDirInfo) {
         DEBUG_PRINT("Memory allocation falied. Free some memory and try again.");
         returnCodeMain = RETURNCODE_MAIN_MEMORY_ALOOCATION_FAILED;
         goto exit;
@@ -44,12 +44,13 @@ int main(int argc, char** argv) {
     closedir(pDir);
 
     //Set iterator to the second element (if exists) and start scanning dirList:
+    //todo: add iterator function to reduce code reuse!
     void* pDirInfoIt;
     LIST_getNext(dirList, pBaseDirInfo, &pDirInfoIt);
-    while (pDirInfoIt != NULL) {
+    while (NULL != pDirInfoIt) {
         dirInfo_t* pCurrentDir = (dirInfo_t*)pDirInfoIt;
         pDir = opendir(pCurrentDir->dirName);
-        if (pDir != NULL) {
+        if (NULL != pDir) {
             //Whoohoo! Directory exists. Scan files and sub directories:
             getFileList(pDir, pCurrentDir->dirName, pCurrentDir->filesList, dirList);
             closedir(pDir);
@@ -70,7 +71,7 @@ int main(int argc, char** argv) {
         while (pDirInfoIterator != NULL) {
             dirInfo_t* pCurrentDir = (dirInfo_t*)pDirInfoIterator;
             pDir = opendir(pCurrentDir->dirName);
-            if (pDir != NULL) {
+            if (NULL != pDir) {
                 //Whoohoo! Directory exists. Scan files and sub directories:
                 getFileList(pDir, pCurrentDir->dirName, updatedFileList, dirList);
                 closedir(pDir);
@@ -81,7 +82,8 @@ int main(int argc, char** argv) {
                 findDiffNodes(pCurrentDir->filesList, updatedFileList, "Updated", TRUE);
 
                 //Swap lists:
-                LIST_copyList(&pCurrentDir->filesList, updatedFileList, fileInfoCopyFunction);
+                LIST_destroy(pCurrentDir->filesList);
+                LIST_copy(&pCurrentDir->filesList, updatedFileList, fileInfoCopyFunction);
                 LIST_destroy(updatedFileList);
                 updatedFileList = LIST_create(releaseMemoryFile, getFileName);
 
@@ -99,10 +101,20 @@ int main(int argc, char** argv) {
         delay(SLEEP_TIME_SEC * 1000);
     }
 
+    // Bye!
+    DEBUG_PRINT("\n\nThanks for choosing Moneytor! Seeya again soon :)\n");
+
     //Exit properly: clean memory mainly -
     exit:
-    LIST_destroy(dirList);
-    LIST_destroy(updatedFileList);
-    DEBUG_PRINT("\n\nThanks for choosing Moneytor! Seeya again soon :)\n");
+    dirListReturnCode = LIST_destroy(dirList);
+    if( RETURNCODE_SUCCESS != dirListReturnCode) {
+        DEBUG_PRINT("Destroying directory list has Failed. Return code is: %d", dirListReturnCode);
+    }
+
+    fileListReturnCode = LIST_destroy(updatedFileList);
+    if( RETURNCODE_SUCCESS != fileListReturnCode) {
+        DEBUG_PRINT("Destroying files list has Failed. Return code is: %d", dirListReturnCode);
+    }
+
     return returnCodeMain;
 }

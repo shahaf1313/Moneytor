@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-#include "inc/moneytorDefinitions.h"
+#include "inc/common.h"
 #include "inc/list.h"
 
 #define MAX_PATH_LENGTH 255

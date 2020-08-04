@@ -47,9 +47,9 @@ int getFileList(DIR* pDir, char* currentWorkingDirectory, LIST fileList, LIST di
     int i = 0;
 
     rewinddir(pDir);
-    while ((pDirent = readdir(pDir)) != NULL) {
+    while (NULL != (pDirent = readdir(pDir))) {
         //Skip self and father folder:
-        if ((strcmp(pDirent->d_name, "..") == 0) || (strcmp(pDirent->d_name, ".") == 0)) {
+        if (0 == (strcmp(pDirent->d_name, "..")) || (0 == strcmp(pDirent->d_name, "."))) {
             continue;
         }
 
@@ -94,10 +94,11 @@ listDataHandlersEntryType_t getEntryType(struct dirent* pd, char* entryFullPath,
 static void newDirFoundHandler(char* newDirFullPath, LIST dirList) {
     //Check if directory exists in DirsList, and if not - add it!
     void* pDirIt = LIST_getFirst(dirList);
-    int dirListLength = LIST_getLength(dirList), i;
+    int dirListLength, i;
+    LIST_getLength(dirList, &dirListLength);
     for (i = 0; i < dirListLength; ++i)
     {
-        if (strcmp(newDirFullPath, ((dirInfo_t*)pDirIt)->dirName) == 0) {
+        if (0 == strcmp(newDirFullPath, ((dirInfo_t*)pDirIt)->dirName)) {
             break;
         }
         LIST_getNext(dirList, pDirIt, &pDirIt);
@@ -112,7 +113,7 @@ static void newDirFoundHandler(char* newDirFullPath, LIST dirList) {
 
 static time_t getEntryLastChanged(char* entryFullPath) {
     struct stat status;
-    if (stat(entryFullPath, &status) == -1) {
+    if (-1 == stat(entryFullPath, &status)) {
         DEBUG_PRINT("Could not read status of entry: %s. Please check permitions and try again.", entryFullPath);
         return 0;
     }
@@ -123,12 +124,14 @@ void findDiffNodes(LIST original, LIST updated, char* strToPrint, int updateChec
     int foundFile;
     void* originalData = LIST_getFirst(original);
     void* updatedData;
-    int originalLength = LIST_getLength(original), updatedLength = LIST_getLength(updated);
+    int originalLength, updatedLength;
+    LIST_getLength(original, &originalLength);
+    LIST_getLength(updated, &updatedLength);
     for (int i = 0; i < originalLength; ++i) {
         foundFile = FALSE;
         updatedData = LIST_getFirst(updated);
         for (int j = 0; j < updatedLength; ++j) {
-            if (strcmp( ((fileInfo_t*)originalData)->fileName, ((fileInfo_t*)updatedData)->fileName) == 0) {
+            if (0 == strcmp( ((fileInfo_t*)originalData)->fileName, ((fileInfo_t*)updatedData)->fileName)) {
                 foundFile = TRUE;
                 break;
             }
@@ -150,18 +153,19 @@ void printDirTree(LIST dirList) {
     DEBUG_PRINT("List of all subDirs:\n");
     LIST_print(dirList);
     DEBUG_PRINT("=================================\n\n");
-    int n = LIST_getLength(dirList), returnCode = 0;
+    int dirListLength, returnCode = RETURNCODE_SUCCESS;
+    LIST_getLength(dirList, &dirListLength);
     void* pVoidDirInfo_t = LIST_getFirst(dirList);
-    for (int i = 0; i < n; ++i)
+    for (int i = 0; i < dirListLength; ++i)
     {
         dirInfo_t* pDirInfo_t = (dirInfo_t*)pVoidDirInfo_t;
         // Check if element exists (could have been deleted and hence NULL):
-        if (pDirInfo_t != NULL) {
+        if (NULL != pDirInfo_t) {
             DEBUG_PRINT("File list in folder: %s:", pDirInfo_t->dirName);
             LIST_print(pDirInfo_t->filesList);
         }
         returnCode = LIST_getNext(dirList, pVoidDirInfo_t, &pVoidDirInfo_t);
-        if (i < n-1 && returnCode != 0) {
+        if (i < dirListLength-1 && returnCode != 0) {
             break;
         }
     }
