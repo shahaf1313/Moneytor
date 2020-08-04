@@ -41,6 +41,23 @@ char* getName(void* pDataVoid) {
 
 using namespace testing;
 
+// CR: (DC) Create a new test that does the following:
+// CR: (DC) 1. Create a new list, and for the release function, pass a function that returns 1
+// CR: (DC) 2. Add a new element to the list with the value ((void*) 10) (it's a list of ints)
+// CR: (DC) 3. Remove the element with value ((void*) 10)
+// CR: (DC) Run this test, make sure it works. Then run it with valgrind. Were there any leaks?
+
+// CR: (DC) Create a new test that calls LIST_copyList with dest=NULL
+
+// CR: (DC) Create a new test that calls LIST_copyList with a copy function that returns NULL
+// CR: (DC) Run the test with valgrind. Were there any leaks?
+
+// CR: (DC) Create a new test that does the following:
+// CR: (DC) 1. Create a new list, and for the getName function, pass a function that returns NULL
+// CR: (DC) 2. Add the element ((void*) 10) to the list
+// CR: (DC) 3. Print the list (using LIST_print)
+// CR: (DC) Run this test, make sure it works. Then run it with valgrind. Were there any leaks?
+
 TEST(Sample, LIST_test) {
     int i;
     char ch, snum[2];
