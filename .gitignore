@@ -1,6 +1,6 @@
 .idea/deployment.xml
 .idea/workspace.xml
-cmake-build-debug*
+cmake-build*
 .idea/dictionaries/Shahaf.xml
 
 cmake-build-release/
