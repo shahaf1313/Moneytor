@@ -50,14 +50,16 @@ TEST(Sample, utills_test) {
     dirInfo_t* pDirInfo_t = createDirInfo_t(folder);
     LIST_addElement(dirList, (void*)pDirInfo_t);
     DIR* pDir = opendir(folder);
-    int filesNum = getFileList(pDir, folder, pDirInfo_t->filesList, dirList);
-    printDirTree(dirList);
-    EXPECT_EQ(filesNum, 8);
+    returnCode_t returnCode = getFileList(pDir, folder, pDirInfo_t->filesList, dirList);
+    EXPECT_EQ(printDirTree(dirList), RETURNCODE_SUCCESS);
+    EXPECT_EQ(returnCode, RETURNCODE_SUCCESS);
 
-    //check findDiffNodes:
+    //check findDiffElements:
     fileList = LIST_create(releaseMemoryFile, getFileName);
     //get another copy to fileList:
-    getFileList(pDir, folder, fileList, dirList);
+    returnCode = getFileList(pDir, folder, fileList, dirList);
+    EXPECT_EQ(returnCode, RETURNCODE_SUCCESS);
+
     //remove one element:
     LIST_removeElement(fileList, LIST_getLast(fileList));
     //add another:
@@ -67,8 +69,8 @@ TEST(Sample, utills_test) {
     LIST_print(pDirInfo_t->filesList);
     //compare with findDiffs:
     DEBUG_PRINT("\nremoved dir2, added Hakitsy. lets check:");
-    findDiffNodes(pDirInfo_t->filesList, fileList, "Deleted", false);
-    findDiffNodes(fileList, pDirInfo_t->filesList, "Added", false);
+    findDiffElements(pDirInfo_t->filesList, fileList, "Deleted", false);
+    findDiffElements(fileList, pDirInfo_t->filesList, "Added", false);
     //destroy lists and dir:
     closedir(pDir);
     EXPECT_EQ(LIST_destroy(dirList), 0);

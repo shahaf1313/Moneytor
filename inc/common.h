@@ -9,15 +9,6 @@
     #define DEBUG_PRINT(...) {}
 #endif
 
-#define FREE(p)                 \
-        do {                    \
-            if (p != NULL) {    \
-                free(p);        \
-            }                   \
-            p = NULL;           \
-        }                       \
-        while(0);               \
-
 typedef enum {
     RETURNCODE_SUCCESS = 0,
     RETURNCODE_LIST_GETLENGTH_LIST_IS_NULL,
@@ -34,13 +25,43 @@ typedef enum {
     RETURNCODE_LIST_GETNEXT_LAST_ELEMENT,
     RETURNCODE_LIST_GETNEXT_CURRENT_ELEMENT_NOT_FOUND,
     RETURNCODE_LIST_COPY_PARAMETER_NULL,
-    RETURNCODE_LIST_COPY_FAILED_CREATE_NEW_LIST,
     RETURNCODE_LIST_COPY_FAILED_TO_ADD_ELEMENT,
+    RETURNCODE_LIST_COPY_FAILED_CREATE_NEW_LIST,
     RETURNCODE_LIST_COPY_FAILED_TO_COPY_ELEMENT,
+    RETURNCODE_LIST_UTILLS_GETENTRYLASTCHANGED_COULD_NOT_GET_FILE_STATUS,
+    RETURNCODE_LIST_UTILLS_GETENTRYLASTCHANGED_OUTPUT_POINTER_NULL,
+    RETURNCODE_LIST_UTILLS_NEWDIRFOUNDHANDLER_PARAMETER_NULL,
+    RETURNCODE_LIST_UTILLS_NEWDIRFOUNDHANDLER_COULD_NOT_ALLOCATE_MEMORY,
+    RETURNCODE_LIST_UTILLS_NEWDIRFOUNDHANDLER_COULD_NOT_ADD_NEW_DIR_TO_DIRLIST,
+    RETURNCODE_LIST_UTILLS_GETENTRYFULLPATH_PATH_LENGTH_EXCEEDS_MAX_PATH_LENGTH,
+    RETURNCODE_LIST_UTILLS_GETENTRYFULLPATH_OUTPUT_POINTER_NULL,
+    RETURNCODE_LIST_UTILLS_GETFILELIST_PARAMETER_NULL,
+    RETURNCODE_LIST_UTILLS_GETFILELIST_COULD_NOT_ALLOCATE_MEMORY,
+    RETURNCODE_LIST_UTILLS_FINDDIFFELEMENTS_PARAMETER_NULL,
+    RETURNCODE_LIST_UTILLS_PRINTDIRTREE_PRINT_FAILED,
     RETURNCODE_MAIN_INVALID_ARGUMENT_NUMBER,
     RETURNCODE_MAIN_MEMORY_ALOOCATION_FAILED,
     RETURNCODE_MAIN_COULDNT_OPEN_GIVEN_FOLDER,
     RETURNCODE_MAIN_UNINITIALIZED
 } returnCode_t;
+
+#define FREE(p)                 \
+        do {                    \
+            if (NULL != p) {    \
+                free(p);        \
+            }                   \
+            p = NULL;           \
+        }                       \
+        while(0);               \
+
+#define CHECK_RETURN_CODE(returnCode)                           \
+        do {                                                    \
+            if (RETURNCODE_SUCCESS != returnCode) {             \
+            return returnCode;                                  \
+            }                                                   \
+        }                                                       \
+        while(0);                                               \
+
+
 
 #endif //MONEYTOR_COMMON_H
