@@ -31,8 +31,13 @@ static node_t* list_getNode(LIST list, void* data);
 
 LIST LIST_create(memoryReleaseFunction_t memoryReleaseFunction, getNameFunction_t getNameFunction) {
     LIST list = NULL;
+    // CR: (DC) You have two semicolons at the end
     node_t* firstDummyNode = NULL;;
     node_t* lastDummyNode = NULL;;
+
+    // CR: (DC) In the beginning of any *public* function we MUST make parameter verifications (and you did,
+    // CR: (DC) in most functions). Here you should add verifications that the function pointers
+    // CR: (DC) received are not NULL. You can verify both in a single if block.
 
     list = (list_t*) malloc(sizeof(*list));
     if (NULL == list) {
@@ -40,12 +45,14 @@ LIST LIST_create(memoryReleaseFunction_t memoryReleaseFunction, getNameFunction_
         goto cleanup;
     }
 
+    // CR: (DC) You can delete this variable and store the allocated memory directly in list->first
     firstDummyNode = (node_t*) malloc(sizeof(*firstDummyNode));
     if (NULL == firstDummyNode) {
         DEBUG_PRINT("Memory allocation failed in LIST_create function. Please try again after memory has been freed.");
         goto cleanup;
     }
 
+    // CR: (DC) You can delete this variable and store the allocated memory directly in list->last
     lastDummyNode = (node_t*) malloc(sizeof(*lastDummyNode));
     if (NULL == lastDummyNode) {
         DEBUG_PRINT("Memory allocation failed in LIST_create function. Please try again after memory has been freed.");
@@ -69,10 +76,23 @@ LIST LIST_create(memoryReleaseFunction_t memoryReleaseFunction, getNameFunction_
     lastDummyNode->next = NULL;
     lastDummyNode->data = NULL;
 
+    // CR: (DC) As the conventions document says, there can only be one return statement in a function
+    // CR: (DC) that has a cleanup label, and that return statement must be at the bottom, after the cleanup
+    // CR: (DC) section.
+    // CR: (DC) This return statement should be deleted.
     // Success!
     return list;
 
     cleanup:
+    // CR: (DC) Remember that after freeing a pointer we want to set it back to NULL, to prevent using
+    // CR: (DC) a dangling pointer.
+    // CR: (DC) Also, notice the code duplication between these three deallocations.
+    // CR: (DC) As we highly dislike code duplication, extract a macro, called FREE(p) that does the following:
+    // CR: (DC) 1. Test if the pointer is NULL
+    // CR: (DC) 2. If so, calls free() on it
+    // CR: (DC) 3. Sets the pointer to NULL
+    // CR: (DC) Although a function is preferrable over a macro, this FREE(p) macro can't be written as a
+    // CR: (DC) function, as it won't be able to set the pointer to NULL.
     if (NULL != list) {
         free(list);
     }
@@ -98,6 +118,13 @@ returnCode_t LIST_getLength(LIST list, int* length) {
 void* LIST_getFirst(LIST list) {
     if (NULL == list) {
         return NULL;
+    // CR: (DC) No need for the else, as you make a return in the first if block
+    // CR: (DC) Can be restructured:
+    // CR: (DC) if (NULL == list) {
+    // CR: (DC)     return NULL;
+    // CR: (DC) }
+    // CR: (DC) if (0 == list->length) { ...
+    // CR: (DC) This technique is also called "early return" or "early exit"
     } else if (0 == list->length) {
         return NULL;
     }
@@ -119,7 +146,39 @@ returnCode_t LIST_getNext(LIST list, void* pDataCurrent, void** pDataNext) {
         return RETURNCODE_LIST_GETNEXT_LIST_NULL;
     }
 
+    // CR: (DC) Comment is not needed. If a function call has to be commented, it means the function name
+    // CR: (DC) isn't informative enough.
+    // CR: (DC) I want to explain why I always tell you to remove comments. Some developers think comments
+    // CR: (DC) are good practice, and that it will make the next developer's life easier, by explaining
+    // CR: (DC) the code for him. That's all true, comments do help the next developer understand the code
+    // CR: (DC) better. However, comments have a single property that make them very dangerous. Yes, you
+    // CR: (DC) read it right: DANGEROUS. I bet you think "What?! How comments can be dangerous? They
+    // CR: (DC) don't even compile!". And THAT is the same thing that makes them dangerous:
+    // CR: (DC) They don't compile. The preprocessor deletes all comments before compiling. The outcome
+    // CR: (DC) of this fact is that *comments rot*. Like food in the fridge that gets forgotten, comments
+    // CR: (DC) rot over time. Why is that you ask? Because code is dynamic, it changes, we add a feature,
+    // CR: (DC) fix a bug, refactor this, rename that. Just look at your list module, how much it have
+    // CR: (DC) changed over just a few days. Whenever we change code, for example, rename a function,
+    // CR: (DC) every use of that function *won't work* unless we rename the usages to use the new name.
+    // CR: (DC) Why is that? Because the compiler (and the IDE) CARES about code, and checks that it's used
+    // CR: (DC) correctly. While code changes are maintained by the compiler and the IDE, COMMENTS DON'T.
+    // CR: (DC) It's very common to find a comment like that:
+    // CR: (DC)     // Print the list
+    // CR: (DC)     // LIST_copy(list1, list2)
+    // CR: (DC) This was probably caused by a developer changing the call from LIST_print to LIST_copy,
+    // CR: (DC) because of a bug or a new feature. However, because the comment is not checked by the compiler
+    // CR: (DC) the developer simply overlook the comment and didn't change it along with the code. Nobody
+    // CR: (DC) cares. It's so easy to overlook comments as the IDE paints them grey.
+    // CR: (DC) The next developer that comes along won't understand how LIST_copy prints the list, and it will
+    // CR: (DC) only make him more confused.
+    // CR: (DC) Thus, comments are good at explaining your code, but it's a double edged sword.
+    // CR: (DC) A better way to make your code more readable is by naming your functions with good,
+    // CR: (DC) informative names, naming your variables with informative names, and structuring your code
+    // CR: (DC) in a way that it will be readable. Comments should be used to explain code only when the code
+    // CR: (DC) is really complicated and requires a delicate understanding of how the code was designed,
+    // CR: (DC) and why certain choices were made when writing the code. Most of the time, this is not the case.
     // Iterate over the list and search for pDataCurrent:
+    // CR: (DC) nodeSearcher can be const
     node_t* nodeSearcher = list_getNode(list, pDataCurrent);
 
     // Check if we found element:

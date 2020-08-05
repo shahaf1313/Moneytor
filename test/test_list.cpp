@@ -98,6 +98,13 @@ TEST(Sample, test_list_dor) {
 
 }
 
+// CR: (DC) Create a test that calls LIST_getLength(list, NULL)
+
+// CR: (DC) Create a test that does the following:
+// CR: (DC) 1. Create a list
+// CR: (DC) 2. Insert the value ((void*) 10)
+// CR: (DC) 3. Call LIST_getNext(my_list, ((void*) 10), NULL)
+
 TEST(Sample, test_list_shahaf) {
     int i, listLength;
     char ch, snum[2];

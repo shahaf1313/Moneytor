@@ -2,3 +2,5 @@
 .idea/workspace.xml
 cmake-build-debug*
 .idea/dictionaries/Shahaf.xml
+
+cmake-build-release/
