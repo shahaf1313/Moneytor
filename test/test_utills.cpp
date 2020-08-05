@@ -67,8 +67,8 @@ TEST(Sample, utills_test) {
     LIST_print(pDirInfo_t->filesList);
     //compare with findDiffs:
     DEBUG_PRINT("\nremoved dir2, added Hakitsy. lets check:");
-    findDiffNodes(pDirInfo_t->filesList, fileList, "Deleted", FALSE);
-    findDiffNodes(fileList, pDirInfo_t->filesList, "Added", FALSE);
+    findDiffNodes(pDirInfo_t->filesList, fileList, "Deleted", false);
+    findDiffNodes(fileList, pDirInfo_t->filesList, "Added", false);
     //destroy lists and dir:
     closedir(pDir);
     EXPECT_EQ(LIST_destroy(dirList), 0);

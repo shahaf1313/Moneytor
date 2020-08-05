@@ -77,9 +77,9 @@ int main(int argc, char** argv) {
                 closedir(pDir);
 
                 //Print changes:
-                findDiffNodes(pCurrentDir->filesList, updatedFileList, "Deleted", FALSE);
-                findDiffNodes(updatedFileList, pCurrentDir->filesList, "Added", FALSE);
-                findDiffNodes(pCurrentDir->filesList, updatedFileList, "Updated", TRUE);
+                findDiffNodes(pCurrentDir->filesList, updatedFileList, "Deleted", false);
+                findDiffNodes(updatedFileList, pCurrentDir->filesList, "Added", false);
+                findDiffNodes(pCurrentDir->filesList, updatedFileList, "Updated", true);
 
                 //Swap lists:
                 LIST_destroy(pCurrentDir->filesList);

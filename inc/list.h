@@ -14,10 +14,6 @@ typedef char* (*getNameFunction_t)(void*);
 
 typedef void* (*copyFunction_t)(void*);
 
-// CR: (DC) Regarding getDataNameFunc: Do we expect the function to allocate memory for the string, and we
-// CR: (DC) would deallocate it? Or maybe getDataNameFunc isn't allowed to allocate memory as we won't free it?
-// CR: (DC) Specify in the documentation. It's very important to be highly precise regarding memory handling,
-// CR: (DC) as it is the most delicate issue when writing in C.
 /**
  * @brief This function creates a list.
  * It allocates memory for its own usage. When the user finishes using the list, he MUST call LIST_destroy(LIST list)
@@ -26,7 +22,8 @@ typedef void* (*copyFunction_t)(void*);
  * @param memoryReleaseFunc [IN] a pointer to function that releases allocated memory for each of the data elements.
  * This function MUST return 0 when it has released memory successfully, OW another integer.
  * @param getDataNameFunc [IN] a pointer to a function that returns a pointer to a string that contains a name to each
- * for the data elements stored in the list.
+ * for the data elements stored in the list. This function can not allocate memory to the string. It must be contained
+ * inside the data.
  * @returns On success - a valid LIST instance, On failure - NULL.
 **/
 LIST LIST_create(memoryReleaseFunction_t memoryReleaseFunction, getNameFunction_t getNameFunction);

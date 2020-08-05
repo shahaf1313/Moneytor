@@ -128,11 +128,11 @@ void findDiffNodes(LIST original, LIST updated, char* strToPrint, int updateChec
     LIST_getLength(original, &originalLength);
     LIST_getLength(updated, &updatedLength);
     for (int i = 0; i < originalLength; ++i) {
-        foundFile = FALSE;
+        foundFile = false;
         updatedData = LIST_getFirst(updated);
         for (int j = 0; j < updatedLength; ++j) {
             if (0 == strcmp( ((fileInfo_t*)originalData)->fileName, ((fileInfo_t*)updatedData)->fileName)) {
-                foundFile = TRUE;
+                foundFile = true;
                 break;
             }
             LIST_getNext(updated, updatedData, &updatedData);
