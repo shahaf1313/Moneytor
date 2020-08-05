@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-#ifdef NDEBUG
+#ifndef NDEBUG
     #define DEBUG_PRINT(...) {printf(__VA_ARGS__); printf("\n");}
 #else
     #define DEBUG_PRINT(...) {}
