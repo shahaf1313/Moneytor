@@ -12,6 +12,10 @@ extern "C" {
 
 using namespace testing;
 
+// CR: (DC) Add a test that calls getFileList() with a DIR* to a directory that contains only one file,
+// CR: (DC) but before calling getFileList, mock LIST_addElement to return NULL
+// CR: (DC) Run that test with valgrind
+
 TEST(Sample, utills_test) {
     //check delay:
     clock_t tol = CLOCKS_PER_SEC / 1000;
