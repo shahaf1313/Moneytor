@@ -1,6 +1,8 @@
 #include "inc/listDataHandlers.h"
 #include "inc/list.h"
 
+// CR: (DC) Change pFileInfo_t to fileInfo_t*. Fix everywhere.
+// CR: (DC) Remember that in C, there's an implicit cast from any pointer type to void* and vice versa
 char* getFileName(void* pFileInfo_t) {
     if (NULL == pFileInfo_t) {
         return NULL;
@@ -8,6 +10,7 @@ char* getFileName(void* pFileInfo_t) {
     return ((fileInfo_t*) pFileInfo_t)->fileName;
 }
 
+// CR: (DC) Change pFileInfo_t to dirInfo_t*. Fix everywhere.
 char* getDirName(void* pDirInfo_t) {
     if (NULL == pDirInfo_t) {
         return NULL;
@@ -22,6 +25,10 @@ int releaseMemoryFile(void* pFileInfo_t) {
 
 int releaseMemoryDir(void* pDirInfo_t) {
     dirInfo_t* pDirInfo = (dirInfo_t*) pDirInfo_t;
+    // CR: (DC) In cleanup functions, we allow ourselves not to check return codes and simply do our best effort
+    // CR: (DC) in releasing the resources. It's not like there's something we can do if deallocation failed.
+    // CR: (DC) So you can ignore the return code.
+    // CR: (DC) Additionally, set pDirInfo->filesList to NULL after destroying it, just like we discussed.
     returnCode_t returnCode = LIST_destroy(pDirInfo->filesList);
     if (RETURNCODE_SUCCESS != returnCode) {
         DEBUG_PRINT("Could not destroy subDirsList in dirInfo_t's releaseMemory function. "
@@ -33,6 +40,7 @@ int releaseMemoryDir(void* pDirInfo_t) {
 }
 
 fileInfo_t* createFileInfo_t(char* name, time_t lastChanged, listDataHandlersEntryType_t fileType) {
+    // CR: (DC) What if name is NULL? Fix everywhere
     if (strlen(name) > MAX_PATH_LENGTH) {
         DEBUG_PRINT("File name exceeds MAX_PATH_LENGTH in createFileInfo_t. Memory was not allocated. Returning NULL.");
         return NULL;

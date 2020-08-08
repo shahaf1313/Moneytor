@@ -1,14 +1,18 @@
 #include "inc/main.h"
 
+// CR: (DC) Why int? You have bool type.
 static volatile int keepRunning = 1;
 
+// CR: (DC) Rename to indicate what this function does, such as stopRunning
 void intHandler(int dummy) {
     keepRunning = 0;
 }
 
 int main(int argc, char** argv) {
+    // CR: (DC) Is it an airplane? Is it a starship?! No! It's captain obvious!
     //Variables declaration:
     char* pFolderPath;
+    // CR: (DC) What if LIST_create failed?!
     LIST updatedFileList = LIST_create(releaseMemoryFile, getFileName);
     LIST dirList = LIST_create(releaseMemoryDir, getDirName);
     returnCode_t returnCodeMain = RETURNCODE_MAIN_UNINITIALIZED, dirListReturnCode, fileListReturnCode;
@@ -76,6 +80,12 @@ int main(int argc, char** argv) {
                 getFileList(pDir, pCurrentDir->dirName, updatedFileList, dirList);
                 closedir(pDir);
 
+                // CR: (DC) You are consistently ignoring your own functions return values. What if the fail?!
+                // CR: (DC) You shouldn't continue!
+                // CR: (DC) Check the return values!
+                // CR: (DC) It will mean this function will get much bigger. Think of a way to split it into
+                // CR: (DC) multiple functions, but really think what should be the best split to do.
+                // CR: (DC) If you can't figure it out, lets discuss it.
                 //Print changes:
                 findDiffElements(pCurrentDir->filesList, updatedFileList, "Deleted", false);
                 findDiffElements(updatedFileList, pCurrentDir->filesList, "Added", false);
@@ -105,7 +115,9 @@ int main(int argc, char** argv) {
     DEBUG_PRINT("\n\nThanks for choosing Moneytor! Seeya again soon :)\n");
 
     //Exit properly: clean memory mainly -
+    // CR: (DC) Use AutoFormat regularly (Ctrl+Alt+L)
     exit:
+    // CR: (DC) Ignore return code in cleanup
     dirListReturnCode = LIST_destroy(dirList);
     if( RETURNCODE_SUCCESS != dirListReturnCode) {
         DEBUG_PRINT("Destroying directory list has Failed. Return code is: %d", dirListReturnCode);

@@ -15,6 +15,8 @@ typedef enum {
     LIST_DATA_HANDLERS_ENTRY_TYPE_UNKNNOWN
 } listDataHandlersEntryType_t;
 
+// CR: (DC) Split this module into two modules: file_info.h/.c will contain all fileInfo_t related
+// CR: (DC) content, and dir_info.h/.c will contain all dirInfo_t related content
 typedef struct fileInfo {
     char fileName[MAX_PATH_LENGTH];
     time_t lastChanged;

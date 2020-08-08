@@ -9,6 +9,7 @@
 
 #define SLEEP_TIME_SEC 10
 
+// CR: (DC) Why is this function in the header file? It's used only internally in main.c
 // This function catches ctrl + c and causes to program termination
 void intHandler(int dummy);
 
