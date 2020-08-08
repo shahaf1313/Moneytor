@@ -55,6 +55,7 @@ LIST LIST_create(memoryReleaseFunction_t memoryReleaseFunction, getNameFunction_
         goto cleanup;
     }
 
+    // CR: (DC) What did I say about obvious comments? Remove all obvious comments
     // Set list params:
     list->length = 0;
     list->memoryReleaseFunc = memoryReleaseFunction;
@@ -71,9 +72,17 @@ LIST LIST_create(memoryReleaseFunction_t memoryReleaseFunction, getNameFunction_
     list->last->data = NULL;
 
     // Success!
+    // CR: (DC) As the conventions doc says, if your function needs cleanup, it can only have
+    // CR: (DC) ONE return statement and ONE label. Here you have two labels.
+    // CR: (DC) Remove the exit: label. You will need to know in your cleanup label whether to actually
+    // CR: (DC) do cleanup or not. Remember, if you're facing a programming problem, adding another variable
+    // CR: (DC) will usually solve it.
     goto exit;
 
 cleanup:
+    // CR: (DC) You can use your LIST_destroy function, that can take a list (even a NULL list)
+    // CR: (DC) and destroy it. Note that your LIST_destroy function can handle half-baked lists (lists
+    // CR: (DC) that weren't fully created)
     if (NULL != list) {
         FREE(list->first);
         FREE(list->last);
