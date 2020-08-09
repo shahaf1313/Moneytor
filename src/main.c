@@ -29,7 +29,6 @@ int main(int argc, char** argv) {
     pFolderPath = argv[1];
     DIR* pDir = opendir(pFolderPath);
 
-    //Open folder and add folder to DirsList:
     if (NULL == pDir) {
         DEBUG_PRINT("Could not open specified directory. Usage: Monytor <dir_path>.");
         returnCodeMain = RETURNCODE_MAIN_COULDNT_OPEN_GIVEN_FOLDER;
@@ -41,10 +40,10 @@ int main(int argc, char** argv) {
         returnCodeMain = RETURNCODE_MAIN_MEMORY_ALOOCATION_FAILED;
         goto exit;
     }
-    LIST_addElement(dirList, (void*)pBaseDirInfo);
+    CHECK_RETURN_CODE_MAIN(LIST_addElement(dirList, (void*)pBaseDirInfo));
 
     //Initialize file list for the first time, including all subdir if exists:
-    getFileList(pDir, pBaseDirInfo->dirName, pBaseDirInfo->filesList, dirList);
+    CHECK_RETURN_CODE_MAIN(getFileList(pDir, pBaseDirInfo->dirName, pBaseDirInfo->filesList, dirList));
     closedir(pDir);
 
     //Set iterator to the second element (if exists) and start scanning dirList:
@@ -77,7 +76,7 @@ int main(int argc, char** argv) {
             pDir = opendir(pCurrentDir->dirName);
             if (NULL != pDir) {
                 //Whoohoo! Directory exists. Scan files and sub directories:
-                getFileList(pDir, pCurrentDir->dirName, updatedFileList, dirList);
+                CHECK_RETURN_CODE_MAIN(getFileList(pDir, pCurrentDir->dirName, updatedFileList, dirList));
                 closedir(pDir);
 
                 // CR: (DC) You are consistently ignoring your own functions return values. What if the fail?!
@@ -87,14 +86,15 @@ int main(int argc, char** argv) {
                 // CR: (DC) multiple functions, but really think what should be the best split to do.
                 // CR: (DC) If you can't figure it out, lets discuss it.
                 //Print changes:
-                findDiffElements(pCurrentDir->filesList, updatedFileList, "Deleted", false);
-                findDiffElements(updatedFileList, pCurrentDir->filesList, "Added", false);
-                findDiffElements(pCurrentDir->filesList, updatedFileList, "Updated", true);
+                CHECK_RETURN_CODE_MAIN(findDiffElements(pCurrentDir->filesList, updatedFileList, "Deleted", false));
+                CHECK_RETURN_CODE_MAIN(findDiffElements(updatedFileList, pCurrentDir->filesList, "Added", false));
+                //fixme: fix bug in updated files :)
+                CHECK_RETURN_CODE_MAIN(findDiffElements(pCurrentDir->filesList, updatedFileList, "Updated", true));
 
                 //Swap lists:
-                LIST_destroy(pCurrentDir->filesList);
-                LIST_copy(&pCurrentDir->filesList, updatedFileList, fileInfoCopyFunction);
-                LIST_destroy(updatedFileList);
+                CHECK_RETURN_CODE_MAIN(LIST_destroy(pCurrentDir->filesList));
+                CHECK_RETURN_CODE_MAIN(LIST_copy(&pCurrentDir->filesList, updatedFileList, fileInfoCopyFunction));
+                CHECK_RETURN_CODE_MAIN(LIST_destroy(updatedFileList));
                 updatedFileList = LIST_create(releaseMemoryFile, getFileName);
 
                 //Go to next directory:
@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
                 //Directory has been deleted. Remove it from dirList and continue to next Directory
                 void* tmpPtrToDeletedDir = pDirInfoIterator;
                 LIST_getNext(dirList, pDirInfoIterator, &pDirInfoIterator);
-                LIST_removeElement(dirList, tmpPtrToDeletedDir);
+                CHECK_RETURN_CODE_MAIN(LIST_removeElement(dirList, tmpPtrToDeletedDir));
             }
         }
 
@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
     }
 
     // Bye!
-    DEBUG_PRINT("\n\nThanks for choosing Moneytor! Seeya again soon :)\n");
+    printf("\n\nThanks for choosing Moneytor! Seeya again soon :)\n\n");
 
     //Exit properly: clean memory mainly -
     // CR: (DC) Use AutoFormat regularly (Ctrl+Alt+L)

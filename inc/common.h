@@ -90,6 +90,15 @@ typedef enum {
         }                                                       \
         while(0);                                               \
 
+#define CHECK_RETURN_CODE_MAIN(returnCode)                      \
+        do {                                                    \
+            if (RETURNCODE_SUCCESS != returnCode) {             \
+                returnCodeMain = returnCode;                    \
+                goto exit;                                      \
+            }                                                   \
+        }                                                       \
+        while(0);                                               \
+
 
 
 #endif //MONEYTOR_COMMON_H

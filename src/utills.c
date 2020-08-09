@@ -1,4 +1,5 @@
 #include "inc/utills.h"
+
 /**
  * @brief This function returns the last changed time_t of an spicified entry.
  * @param entryFullPath [IN] entry's full path.
@@ -14,7 +15,7 @@ static returnCode_t getEntryLastChanged(char* entryFullPath, time_t* lastChanged
  * @param entryFullPath [OUT] entry's full path.
  * @returns Appropriate returnCode_t.
  */
-static returnCode_t getEntryFullPath(char* currentWorkingDirectory, char* entryName, char* entryFullPath) ;
+static returnCode_t getEntryFullPath(char* currentWorkingDirectory, char* entryName, char* entryFullPath);
 
 /**
  * @brief This function gets path to an entry and returns it's type (file/dir/unknown) using the
@@ -26,7 +27,8 @@ static returnCode_t getEntryFullPath(char* currentWorkingDirectory, char* entryN
  * @param dirList [IN, OUT] directory list in case of encountering new directory.
  * @returns Appropriate returnCode_t.
  */
-static returnCode_t getEntryType(struct dirent* pd, char* entryFullPath, listDataHandlersEntryType_t* pFileType, LIST dirList);
+static returnCode_t
+getEntryType(struct dirent* pd, char* entryFullPath, listDataHandlersEntryType_t* pFileType, LIST dirList);
 
 /**
  * @brief This function handles encountering a new directory while iterating the current directory.
@@ -82,7 +84,7 @@ returnCode_t getFileList(DIR* pDir, char* currentWorkingDirectory, LIST fileList
             DEBUG_PRINT("Could not create fileInfo_t in getFileList function. Please try again.");
             return RETURNCODE_LIST_UTILLS_GETFILELIST_COULD_NOT_ALLOCATE_MEMORY;
         }
-        CHECK_RETURN_CODE(LIST_addElement(fileList, (void*)pFileInfo_t))
+        CHECK_RETURN_CODE(LIST_addElement(fileList, (void*) pFileInfo_t))
     }
     return RETURNCODE_SUCCESS;
 }
@@ -122,7 +124,8 @@ static returnCode_t getEntryFullPath(char* currentWorkingDirectory, char* entryN
     // CR: (DC) Cast the return value of these to void, to indicate you don't want to check the return value
     // CR: (DC) For example: (void) strcpy(...)
     strcpy(entryFullPath, currentWorkingDirectory);
-    if(strlen(entryFullPath) > 1 && entryFullPath[strlen(entryFullPath)-1] != '/' && entryFullPath[strlen(entryFullPath)-1] != '\\') {
+    if (strlen(entryFullPath) > 1 && entryFullPath[strlen(entryFullPath) - 1] != '/' &&
+        entryFullPath[strlen(entryFullPath) - 1] != '\\') {
         strcat(entryFullPath, "/");
     }
     strcat(entryFullPath, entryName);
@@ -136,6 +139,8 @@ static returnCode_t getEntryFullPath(char* currentWorkingDirectory, char* entryN
 // CR: (DC) You should separate the logic for retrieving the entry type from the logic of creating a
 // CR: (DC) directory info structure and appending it to a list
 static returnCode_t getEntryType(struct dirent* pd, char* entryFullPath, listDataHandlersEntryType_t* pFileType, LIST dirList) {
+static returnCode_t
+getEntryType(struct dirent* pd, char* entryFullPath, listDataHandlersEntryType_t* pFileType, LIST dirList) {
     if (NULL == pFileType) {
         DEBUG_PRINT("Pointer to file type output is NULL. Please try again.");
         return RETURNCODE_LIST_UTILLS_GETENTRYLASTCHANGED_OUTPUT_POINTER_NULL;
@@ -187,7 +192,7 @@ static returnCode_t newDirFoundHandler(char* newDirFullPath, LIST dirList) {
     // CR: (DC)     void* LIST_getData(node_t*)
     // CR: (DC) And pass our iterator to it to extract the data.
     for (pDirIt = LIST_getFirst(dirList); pDirIt != NULL; LIST_getNext(dirList, pDirIt, &pDirIt)) {
-        if (0 == strcmp(newDirFullPath, ((dirInfo_t*)pDirIt)->dirName)) {
+        if (0 == strcmp(newDirFullPath, ((dirInfo_t*) pDirIt)->dirName)) {
             break;
         }
     }
@@ -199,7 +204,7 @@ static returnCode_t newDirFoundHandler(char* newDirFullPath, LIST dirList) {
             DEBUG_PRINT("Could not create dirInfo_t in newDirFoundHandler function. Please try again.");
             return RETURNCODE_LIST_UTILLS_NEWDIRFOUNDHANDLER_COULD_NOT_ALLOCATE_MEMORY;
         }
-        CHECK_RETURN_CODE(LIST_addElement(dirList, (void*)pDirInfo_t))
+        CHECK_RETURN_CODE(LIST_addElement(dirList, (void*) pDirInfo_t))
     }
     return RETURNCODE_SUCCESS;
 }
@@ -251,29 +256,32 @@ returnCode_t findDiffElements(LIST original, LIST updated, char* strToPrint, int
         // CR: (DC) This new function will take a list, a data element and a compare function, and will try
         // CR: (DC) to find the data element in the list, using the compare function given.
         for (updatedData = LIST_getFirst(updated); updatedData != NULL; LIST_getNext(updated, updatedData, &updatedData)) {
-            if (0 == strcmp( ((fileInfo_t*)originalData)->fileName, ((fileInfo_t*)updatedData)->fileName)) {
+            if (0 == strcmp(((fileInfo_t*) originalData)->fileName, ((fileInfo_t*) updatedData)->fileName)) {
                 foundFile = true;
                 break;
             }
         }
         if (!updateCheck && !foundFile) {
-            printf("File %s %s!", ((fileInfo_t*)originalData)->fileName, strToPrint);
+            printf("File %s %s!\n", ((fileInfo_t*) originalData)->fileName, strToPrint);
         } else if (updateCheck && foundFile) {
-            if (((fileInfo_t*)originalData)->lastChanged - ((fileInfo_t*)updatedData)->lastChanged != 0)
-            printf("File %s %s!", ((fileInfo_t*)originalData)->fileName, strToPrint);
+            if ((((fileInfo_t*) originalData)->lastChanged - ((fileInfo_t*) updatedData)->lastChanged) != 0) {
+                printf("File %s %s!\n", ((fileInfo_t*) originalData)->fileName, strToPrint);
+            }
         }
     }
     return RETURNCODE_SUCCESS;
 }
 
 returnCode_t printDirTree(LIST dirList) {
-    DEBUG_PRINT("**********************************************PrintDirTree**********************************************\n\n");
+    DEBUG_PRINT(
+            "**********************************************PrintDirTree**********************************************\n\n");
     DEBUG_PRINT("List of all subDirs:\n");
     CHECK_RETURN_CODE(LIST_print(dirList));
     DEBUG_PRINT("=================================\n\n");
     void* pVoidDirInfo_t;
-    for (pVoidDirInfo_t = LIST_getFirst(dirList); pVoidDirInfo_t != NULL; LIST_getNext(dirList, pVoidDirInfo_t, &pVoidDirInfo_t)) {
-        dirInfo_t* pDirInfo_t = (dirInfo_t*)pVoidDirInfo_t;
+    for (pVoidDirInfo_t = LIST_getFirst(dirList);
+         pVoidDirInfo_t != NULL; LIST_getNext(dirList, pVoidDirInfo_t, &pVoidDirInfo_t)) {
+        dirInfo_t* pDirInfo_t = (dirInfo_t*) pVoidDirInfo_t;
         // Check if element exists (could have been deleted and hence NULL):
         if (NULL != pDirInfo_t) {
             DEBUG_PRINT("File list in folder: %s:", pDirInfo_t->dirName);
