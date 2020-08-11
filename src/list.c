@@ -128,11 +128,6 @@ returnCode_t LIST_getNext(LIST list, node_t* currentNode, node_t** nextNode) {
         return RETURNCODE_LIST_GETNEXT_LIST_OR_NODE_NULL;
     }
 
-    if (currentNode == list->last) {
-        *nextNode = NULL;
-        return RETURNCODE_LIST_GETNEXT_CURRENT_ELEMENT_NOT_FOUND;
-    }
-
     // Check if the element is last in the list (and thus has no next element):
     if (currentNode->next == list->last) {
         *nextNode = NULL;
@@ -140,6 +135,22 @@ returnCode_t LIST_getNext(LIST list, node_t* currentNode, node_t** nextNode) {
     }
 
     *nextNode = currentNode->next;
+    return RETURNCODE_SUCCESS;
+}
+
+returnCode_t LIST_getPrev(LIST list, node_t* currentNode, node_t** prevNode) {
+    if ((NULL == list) || (NULL == currentNode) || (NULL == prevNode)) {
+        DEBUG_PRINT("LIST or pointer to one of the nodes given are NULL. Please try again.");
+        return RETURNCODE_LIST_GETPREV_LIST_OR_NODE_NULL;
+    }
+
+    // Check if the element is first in the list (and thus has no previous element):
+    if (currentNode->prev == list->first) {
+        *prevNode = NULL;
+        return RETURNCODE_LIST_GETPREV_FIRST_ELEMENT;
+    }
+
+    *prevNode = currentNode->prev;
     return RETURNCODE_SUCCESS;
 }
 

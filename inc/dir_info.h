@@ -2,7 +2,6 @@
 #define MONEYTOR_DIR_INFO_H
 
 #include <stdlib.h>
-#include <string.h>
 #include "inc/common.h"
 #include "inc/list.h"
 

@@ -102,15 +102,25 @@ int main(int argc, char** argv) {
                 CHECK_NULL_POINTER_MAIN(updatedFileList);
             } else {
                 //Directory has been deleted. Remove it from dirList and continue to next Directory
-                CHECK_RETURN_CODE_MAIN(LIST_removeElement(dirList, pCurrentDir));
+                node_t* pPrevDirNode = NULL;
+                returnCode_t prevReturnCode = LIST_getPrev(dirList, pNodeDirIterator, &pPrevDirNode);
+                if (RETURNCODE_LIST_GETPREV_FIRST_ELEMENT == prevReturnCode) {
+                    // Folder to guard has been deleted! exit properly:
+                    returnCodeMain = RETURNCODE_MAIN_FOLDER_TO_GUARD_DELETED;
+                    printf("\n\nFolder to guard has been removed or deleted! Exiting Moneytor...\n\n");
+                    goto exit;
+                } else {
+                    CHECK_RETURN_CODE_MAIN(prevReturnCode);
+                    pNodeDirIterator = pPrevDirNode;
+                    CHECK_RETURN_CODE_MAIN(LIST_removeElement(dirList, pCurrentDir));
+                }
             }
         }
-
-        delay(SLEEP_TIME_SEC*1000);
+        delay(SLEEP_TIME_SEC * 1000);
     }
     printf("\n\nThanks for choosing Moneytor! Seeya again soon :)\n\n");
 
-    //Exit properly: clean memory mainly -
+    //Exit properly: clean memory mainly
 exit:
     LIST_destroy(dirList);
     LIST_destroy(updatedFileList);

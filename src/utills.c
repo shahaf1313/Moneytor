@@ -8,7 +8,6 @@ void delay(unsigned int ms) {
     // CR: (DC) Instead, use the sleep() system call that puts your process to sleep and wakes it up
     // CR: (DC) after some time have elapsed.
     // CR: (SE) sleep() doen't work! probably due to SIGINT signal handler :/
-
 }
 
 returnCode_t joinPaths(char* path1, char* path2, char joined[MAX_PATH_LENGTH + 1]) {
@@ -20,9 +19,9 @@ returnCode_t joinPaths(char* path1, char* path2, char joined[MAX_PATH_LENGTH + 1
         DEBUG_PRINT("Current entry full path is longer than MAX_PATH_LENGTH.");
         return RETURNCODE_UTILLS_JOINPATHS_PATH_LENGTH_EXCEEDS_MAX_PATH_LENGTH;
     }
-    (void)strcpy(joined, path1);
-    (void)strcat(joined, "/");
-    (void)strcat(joined, path2);
+    (void) strcpy(joined, path1);
+    (void) strcat(joined, "/");
+    (void) strcat(joined, path2);
     return RETURNCODE_SUCCESS;
 }
 
@@ -77,7 +76,7 @@ returnCode_t getLastChangedTime(char* fullPath, time_t* lastChanged) {
         DEBUG_PRINT("Could not read status of entry: %s. errno is: %d", fullPath, errno);
         return RETURNCODE_UTILLS_GETENTRYLASTCHANGED_COULD_NOT_GET_FILE_STATUS;
     }
-    *lastChanged = status.st_atim.tv_sec;
+    *lastChanged = status.st_mtim.tv_sec;
     return RETURNCODE_SUCCESS;
 }
 
@@ -96,9 +95,9 @@ returnCode_t findDiffElements(LIST originalList, LIST updatedList, const char* s
         bool foundFile = false;
         CHECK_RETURN_CODE(LIST_find(updatedList, LIST_getData(pIteratorOriginal), fileInfoCompareFunction, &foundFile, &pIteratorUpdated));
 
-        originalFile = (fileInfo_t*)LIST_getData(pIteratorOriginal);
+        originalFile = (fileInfo_t*) LIST_getData(pIteratorOriginal);
         if (foundFile) {
-            updatedFile = (fileInfo_t*)LIST_getData(pIteratorUpdated);
+            updatedFile = (fileInfo_t*) LIST_getData(pIteratorUpdated);
         }
 
         if (!shouldCheckUpdate && !foundFile) {
@@ -119,7 +118,7 @@ returnCode_t printDirTree(LIST dirList) {
     DEBUG_PRINT("=================================\n\n");
     node_t* pNodeIterator;
     for (pNodeIterator = LIST_getFirst(dirList); pNodeIterator != NULL; LIST_getNext(dirList, pNodeIterator, &pNodeIterator)) {
-        dirInfo_t* pDirInfo_t = (dirInfo_t*)LIST_getData(pNodeIterator);
+        dirInfo_t* pDirInfo_t = (dirInfo_t*) LIST_getData(pNodeIterator);
         if (NULL != pDirInfo_t) {
             DEBUG_PRINT("File list in folder: %s:", pDirInfo_t->dirName);
             LIST_print(pDirInfo_t->filesList);

@@ -1,8 +1,6 @@
 #ifndef MONEYTOR_MAIN_H
 #define MONEYTOR_MAIN_H
 
-#include <stdio.h>
-#include <string.h>
 #include <signal.h>
 #include "inc/utills.h"
 #include "inc/file_system_scanner.h"

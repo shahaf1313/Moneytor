@@ -50,8 +50,8 @@ TEST(Sample, utills_test) {
     clock_t before = clock();
     delay(1000);
     clock_t after = clock();
-    EXPECT_LE(after - before, tol);
-    EXPECT_GE(after - before, -tol);
+    EXPECT_LE(after - before, CLOCKS_PER_SEC + tol);
+    EXPECT_GE(after - before, CLOCKS_PER_SEC - tol);
 
     //create 3 dirs, each contains 3 files:
     LIST dirList = LIST_create(releaseMemoryDirOuter, getDirNameOuter);

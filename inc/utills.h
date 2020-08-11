@@ -1,21 +1,15 @@
 #ifndef MONEYTOR_UTILLS_H
 #define MONEYTOR_UTILLS_H
 
+#include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <time.h>
 #include <dirent.h>
 #include <sys/stat.h>
-#include <string.h>
 #include "inc/common.h"
 #include "inc/file_info.h"
 #include "inc/dir_info.h"
-
-#ifdef _WIN32
-#include <Windows.h>
-#else
-#include <unistd.h>
-#endif
 
 /**
  * @brief This function delays the program.

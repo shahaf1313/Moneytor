@@ -2,24 +2,11 @@
 #define MONEYTOR_COMMON_H
 
 #include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 
 #define MAX_PATH_LENGTH 255
-
-#ifndef NDEBUG
-// CR: (DC) I want you to add more information to your DEBUG_PRINT macro. Consider the following example, where
-// CR: (DC) I use your DEBUG_PRINT macro:
-// CR: (DC)     DEBUG_PRINT("malloc failed with value %d", return_code);
-// CR: (DC) I want you to change your DEBUG_PRINT macro, so that alongside the "malloc failed" message, it will
-// CR: (DC) also print the file name in which the macro was called (list.c, for example) and the line number
-// CR: (DC) that called the macro (181, for example).
-// CR: (DC) An example debug print that will be printed due to the above example:
-// CR: (DC)     list.c:181: malloc failed with value 2
-// CR: (DC) To implement it, search and read about predefined preprocessor macros and string
-// CR: (DC) concatenation in macros.
-    #define DEBUG_PRINT(...) do {printf(__VA_ARGS__); printf("\n");} while(0)
-#else
-    #define DEBUG_PRINT(...) do {} while(0)
-#endif
+#define MONEYTOR_REPO_NAME "Moneytor"
 
 typedef enum {
     RETURNCODE_SUCCESS = 0,
@@ -36,7 +23,8 @@ typedef enum {
     RETURNCODE_LIST_PRINT_NOT_ALL_ELEMENTS_PRINTED,
     RETURNCODE_LIST_GETNEXT_LIST_OR_NODE_NULL,
     RETURNCODE_LIST_GETNEXT_LAST_ELEMENT,
-    RETURNCODE_LIST_GETNEXT_CURRENT_ELEMENT_NOT_FOUND,
+    RETURNCODE_LIST_GETPREV_LIST_OR_NODE_NULL,
+    RETURNCODE_LIST_GETPREV_FIRST_ELEMENT,
     RETURNCODE_LIST_COPY_PARAMETER_NULL,
     RETURNCODE_LIST_COPY_FAILED_TO_ADD_ELEMENT,
     RETURNCODE_LIST_COPY_FAILED_CREATE_NEW_LIST,
@@ -51,6 +39,8 @@ typedef enum {
     RETURNCODE_UTILLS_GETFILELIST_COULD_NOT_ALLOCATE_MEMORY,
     RETURNCODE_UTILLS_FINDDIFFELEMENTS_PARAMETER_NULL,
     RETURNCODE_UTILLS_PRINTDIRTREE_PRINT_FAILED,
+    RETURNCODE_COMMON_FINDRELATIVEPATH_RELATIVE_PATH_NOT_FOUND,
+    RETURNCODE_COMMON_FINDRELATIVEPATH_STRING_EXCEEDS_MAX_PATH_LENGTH,
     RETURNCODE_MAIN_INVALID_ARGUMENT_NUMBER,
     RETURNCODE_MAIN_MEMORY_ALOOCATION_FAILED,
     RETURNCODE_MAIN_COULDNT_OPEN_GIVEN_FOLDER,
@@ -58,8 +48,35 @@ typedef enum {
     RETURNCODE_MAIN_COULD_NOT_READ_FILE_LIST,
     RETURNCODE_MAIN_POINTER_TO_DIRLIST_IS_NULL,
     RETURNCODE_MAIN_FOUND_NULL_POINTER,
+    RETURNCODE_MAIN_FOLDER_TO_GUARD_DELETED,
     RETURNCODE_MAIN_UNINITIALIZED
 } returnCode_t;
+
+// CR: (SE) This function belongs to utiils.h but it causes cyclic declaration (utill.h includes common.h and vise versa).
+// CR: (SE) I don't have better idea but to add common.c with this function. Do you?
+/**
+ * @brief This function gets full path and name of a folder in this path. It returns a string contains only the relative path to this folder.
+ * The function assumes that the path contains only / as separators between folder and that there are no leading or trilling spaces in the full path.
+ * @param fullPath [IN] The full path to extract relative path from.
+ * @param folderName [IN] Folder name to relate.
+ * @param relativePath [OUT] String contains relative path.
+ * @returns Appropriate returnCode_t.
+ */
+returnCode_t findRelativePath(const char* fullPath, const char* folderName, char relativePath[MAX_PATH_LENGTH+1]);
+
+#ifndef NDEBUG
+#define DEBUG_PRINT(...)                                                                                 \
+                do {                                                                                     \
+                    char relativePath[MAX_PATH_LENGTH+1] = "\0";                                         \
+                    findRelativePath(__FILE__, MONEYTOR_REPO_NAME, relativePath);                        \
+                    printf("%s: line %d: ", relativePath, __LINE__);                                     \
+                    printf(__VA_ARGS__);                                                                 \
+                    printf("\n");                                                                        \
+                }                                                                                        \
+                while(0)
+#else
+#define DEBUG_PRINT(...) do {} while(0)
+#endif
 
 #define FREE(p)                 \
         do {                    \

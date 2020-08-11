@@ -1,7 +1,6 @@
 #ifndef MONEYTOR_LIST_H
 #define MONEYTOR_LIST_H
 
-#include <stdio.h>
 #include <stdlib.h>
 #include "inc/common.h"
 
@@ -55,14 +54,25 @@ node_t* LIST_getLast(LIST list);
 
 /**
  * @brief This function returns a pointer to the next node of a given node in the list.
- * If the node is not on the list, or the node is the last in the list - an appropriate listReturnCode_t is returned.
+ * If the node is the last in the list - an appropriate listReturnCode_t is returned.
  * @param list [IN] is a LIST instance to get it's next element.
  * @param currentNode [IN] is a pointer to a node in the list from which we want to get the next node.
  * @param nextNode [OUT] is an address of a pointer to the next node.
- * If the node is either not found or the last - NULL is set to this pointer's address.
+ * If the node the last in the list - NULL is set to this pointer's address.
  * @returns Appropriate listReturnCode_t.
 **/
 returnCode_t LIST_getNext(LIST list, node_t* currentNode, node_t** nextNode);
+
+/**
+ * @brief This function returns a pointer to the previous node of a given node in the list.
+ * If the node is the first in the list - an appropriate listReturnCode_t is returned.
+ * @param list [IN] is a LIST instance to get it's next element.
+ * @param currentNode [IN] is a pointer to a node in the list from which we want to get the previous node.
+ * @param prevNode [OUT] is an address of a pointer to the previous node.
+ * If the node is the first node in the list - NULL is set to this pointer's address.
+ * @returns Appropriate listReturnCode_t.
+**/
+returnCode_t LIST_getPrev(LIST list, node_t* currentNode, node_t** prevNode);
 
 /**
  * @brief This function returns the data contained inside a valid list node.

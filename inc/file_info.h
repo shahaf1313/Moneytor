@@ -3,7 +3,6 @@
 
 #include <stdlib.h>
 #include <time.h>
-#include <string.h>
 #include "inc/common.h"
 #include "inc/list.h"
 
