@@ -5,12 +5,28 @@
 #include <string.h>
 #include <signal.h>
 #include "inc/utills.h"
+#include "inc/file_system_scanner.h"
 #include "inc/common.h"
 
-#define SLEEP_TIME_SEC 10
+#define SLEEP_TIME_SEC 3
 
-// CR: (DC) Why is this function in the header file? It's used only internally in main.c
-// This function catches ctrl + c and causes to program termination
-void intHandler(int dummy);
+#define CHECK_RETURN_CODE_MAIN(returnCode)                      \
+        do {                                                    \
+            if (RETURNCODE_SUCCESS != (returnCode)) {           \
+                returnCodeMain = (returnCode);                  \
+                goto exit;                                      \
+            }                                                   \
+        }                                                       \
+        while(0)                                                \
+
+#define CHECK_NULL_POINTER_MAIN(p)                                      \
+        do {                                                            \
+            if (NULL == (p)) {                                          \
+                returnCodeMain = RETURNCODE_MAIN_FOUND_NULL_POINTER;    \
+                goto exit;                                              \
+            }                                                           \
+        }                                                               \
+        while(0)                                                        \
+
 
 #endif //MONEYTOR_MAIN_H

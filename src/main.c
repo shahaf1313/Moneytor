@@ -1,34 +1,66 @@
 #include "inc/main.h"
 
-// CR: (DC) Why int? You have bool type.
-static volatile int keepRunning = 1;
+static volatile bool keepRunning = true;
 
-// CR: (DC) Rename to indicate what this function does, such as stopRunning
-void intHandler(int dummy) {
-    keepRunning = 0;
+// This function catches ctrl + c and causes to program termination
+void stopRunning(int dummy) {
+    keepRunning = false;
+}
+
+/**
+ * @brief This function initializes directory tree on program start.
+ * @param dirList [IN,OUT] Directory list that contains only the input folder.
+ * @return Appropriate returncode_t.
+ */
+returnCode_t initializeDirectoryList(LIST* dirList) {
+    if (NULL == dirList) {
+        return RETURNCODE_MAIN_POINTER_TO_DIRLIST_IS_NULL;
+    }
+    DIR* pDir = NULL;
+    node_t* pNodeDirIterator = LIST_getFirst(*dirList);
+    for (LIST_getNext(*dirList, pNodeDirIterator, &pNodeDirIterator); pNodeDirIterator != NULL; LIST_getNext(*dirList, pNodeDirIterator, &pNodeDirIterator)) {
+        dirInfo_t* pCurrentDir = (dirInfo_t*) LIST_getData(pNodeDirIterator);
+        if (NULL == pCurrentDir) {
+            DEBUG_PRINT("Found NULL directory. Fatal error.");
+            return RETURNCODE_MAIN_FOUND_NULL_DIRECTORY;
+        }
+        pDir = opendir(pCurrentDir->dirName);
+        if (NULL != pDir) {
+            if (RETURNCODE_SUCCESS != getFileList(pDir, pCurrentDir->dirName, pCurrentDir->filesList, *dirList)) {
+                closedir(pDir);
+                DEBUG_PRINT("Failed to read file list from dir %s.", pCurrentDir->dirName);
+                return RETURNCODE_MAIN_COULD_NOT_READ_FILE_LIST;
+            }
+            closedir(pDir);
+        } else {
+            DEBUG_PRINT("On initialization, could not print folder to read. FATAL ERROR!");
+            return RETURNCODE_MAIN_COULDNT_OPEN_GIVEN_FOLDER;
+        }
+    }
+    return RETURNCODE_SUCCESS;
 }
 
 int main(int argc, char** argv) {
-    // CR: (DC) Is it an airplane? Is it a starship?! No! It's captain obvious!
-    //Variables declaration:
-    char* pFolderPath;
-    // CR: (DC) What if LIST_create failed?!
+    char* pFolderPath = NULL;
     LIST updatedFileList = LIST_create(releaseMemoryFile, getFileName);
     LIST dirList = LIST_create(releaseMemoryDir, getDirName);
-    returnCode_t returnCodeMain = RETURNCODE_MAIN_UNINITIALIZED, dirListReturnCode, fileListReturnCode;
+    if ((NULL == updatedFileList) || (NULL == dirList)) {
+        DEBUG_PRINT("Unable to init directory list or file list. Please try again.");
+        goto exit;
+    }
+    returnCode_t returnCodeMain = RETURNCODE_MAIN_UNINITIALIZED;
 
     //Attach SIGINT to the termination handler:
-    signal(SIGINT, intHandler);
+    signal(SIGINT, stopRunning);
 
-    //Parse arguments form usr and open the folder's path
     if (2 != argc) {
         DEBUG_PRINT("Incompatible number of parameters. Usage: Moneytor <folder_path>");
         returnCodeMain = RETURNCODE_MAIN_INVALID_ARGUMENT_NUMBER;
         goto exit;
     }
+    // Add target directory to dirList:
     pFolderPath = argv[1];
     DIR* pDir = opendir(pFolderPath);
-
     if (NULL == pDir) {
         DEBUG_PRINT("Could not open specified directory. Usage: Monytor <dir_path>.");
         returnCodeMain = RETURNCODE_MAIN_COULDNT_OPEN_GIVEN_FOLDER;
@@ -36,59 +68,30 @@ int main(int argc, char** argv) {
     }
     dirInfo_t* pBaseDirInfo = createDirInfo_t(pFolderPath);
     if (NULL == pBaseDirInfo) {
-        DEBUG_PRINT("Memory allocation falied. Free some memory and try again.");
+        DEBUG_PRINT("Memory allocation failed. Free some memory and try again.");
         returnCodeMain = RETURNCODE_MAIN_MEMORY_ALOOCATION_FAILED;
         goto exit;
     }
-    CHECK_RETURN_CODE_MAIN(LIST_addElement(dirList, (void*)pBaseDirInfo));
-
-    //Initialize file list for the first time, including all subdir if exists:
+    CHECK_RETURN_CODE_MAIN(LIST_addElement(dirList, (void*) pBaseDirInfo));
     CHECK_RETURN_CODE_MAIN(getFileList(pDir, pBaseDirInfo->dirName, pBaseDirInfo->filesList, dirList));
     closedir(pDir);
-
-    //Set iterator to the second element (if exists) and start scanning dirList:
-    //todo: add iterator function to reduce code reuse!
-    void* pDirInfoIt;
-    LIST_getNext(dirList, pBaseDirInfo, &pDirInfoIt);
-    while (NULL != pDirInfoIt) {
-        dirInfo_t* pCurrentDir = (dirInfo_t*)pDirInfoIt;
-        pDir = opendir(pCurrentDir->dirName);
-        if (NULL != pDir) {
-            //Whoohoo! Directory exists. Scan files and sub directories:
-            getFileList(pDir, pCurrentDir->dirName, pCurrentDir->filesList, dirList);
-            closedir(pDir);
-        } else {
-            DEBUG_PRINT("On initialization, could not print folder to read. FATAL ERROR!");
-            returnCodeMain = RETURNCODE_MAIN_COULDNT_OPEN_GIVEN_FOLDER;
-            goto exit;
-        }
-        LIST_getNext(dirList, pDirInfoIt, &pDirInfoIt);
-    }
+    CHECK_RETURN_CODE_MAIN(initializeDirectoryList(&dirList));
 
     //Start guarding the folder :)
     while (keepRunning) {
         DEBUG_PRINT("\n====================...Scanning...====================");
 
         //Iterate over all directories in the monitored folder:
-        void* pDirInfoIterator = LIST_getFirst(dirList);
-        while (pDirInfoIterator != NULL) {
-            dirInfo_t* pCurrentDir = (dirInfo_t*)pDirInfoIterator;
+        for (node_t* pNodeDirIterator = LIST_getFirst(dirList); pNodeDirIterator != NULL; LIST_getNext(dirList, pNodeDirIterator, &pNodeDirIterator)) {
+            dirInfo_t* pCurrentDir = (dirInfo_t*) LIST_getData(pNodeDirIterator);
             pDir = opendir(pCurrentDir->dirName);
             if (NULL != pDir) {
-                //Whoohoo! Directory exists. Scan files and sub directories:
                 CHECK_RETURN_CODE_MAIN(getFileList(pDir, pCurrentDir->dirName, updatedFileList, dirList));
                 closedir(pDir);
 
-                // CR: (DC) You are consistently ignoring your own functions return values. What if the fail?!
-                // CR: (DC) You shouldn't continue!
-                // CR: (DC) Check the return values!
-                // CR: (DC) It will mean this function will get much bigger. Think of a way to split it into
-                // CR: (DC) multiple functions, but really think what should be the best split to do.
-                // CR: (DC) If you can't figure it out, lets discuss it.
                 //Print changes:
                 CHECK_RETURN_CODE_MAIN(findDiffElements(pCurrentDir->filesList, updatedFileList, "Deleted", false));
                 CHECK_RETURN_CODE_MAIN(findDiffElements(updatedFileList, pCurrentDir->filesList, "Added", false));
-                //fixme: fix bug in updated files :)
                 CHECK_RETURN_CODE_MAIN(findDiffElements(pCurrentDir->filesList, updatedFileList, "Updated", true));
 
                 //Swap lists:
@@ -96,37 +99,20 @@ int main(int argc, char** argv) {
                 CHECK_RETURN_CODE_MAIN(LIST_copy(&pCurrentDir->filesList, updatedFileList, fileInfoCopyFunction));
                 CHECK_RETURN_CODE_MAIN(LIST_destroy(updatedFileList));
                 updatedFileList = LIST_create(releaseMemoryFile, getFileName);
-
-                //Go to next directory:
-                LIST_getNext(dirList, pDirInfoIterator, &pDirInfoIterator);
+                CHECK_NULL_POINTER_MAIN(updatedFileList);
             } else {
                 //Directory has been deleted. Remove it from dirList and continue to next Directory
-                void* tmpPtrToDeletedDir = pDirInfoIterator;
-                LIST_getNext(dirList, pDirInfoIterator, &pDirInfoIterator);
-                CHECK_RETURN_CODE_MAIN(LIST_removeElement(dirList, tmpPtrToDeletedDir));
+                CHECK_RETURN_CODE_MAIN(LIST_removeElement(dirList, pCurrentDir));
             }
         }
 
-        //Wait till next iteration:
-        delay(SLEEP_TIME_SEC * 1000);
+        delay(SLEEP_TIME_SEC*1000);
     }
-
-    // Bye!
     printf("\n\nThanks for choosing Moneytor! Seeya again soon :)\n\n");
 
     //Exit properly: clean memory mainly -
-    // CR: (DC) Use AutoFormat regularly (Ctrl+Alt+L)
-    exit:
-    // CR: (DC) Ignore return code in cleanup
-    dirListReturnCode = LIST_destroy(dirList);
-    if( RETURNCODE_SUCCESS != dirListReturnCode) {
-        DEBUG_PRINT("Destroying directory list has Failed. Return code is: %d", dirListReturnCode);
-    }
-
-    fileListReturnCode = LIST_destroy(updatedFileList);
-    if( RETURNCODE_SUCCESS != fileListReturnCode) {
-        DEBUG_PRINT("Destroying files list has Failed. Return code is: %d", dirListReturnCode);
-    }
-
+exit:
+    LIST_destroy(dirList);
+    LIST_destroy(updatedFileList);
     return returnCodeMain;
 }

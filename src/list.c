@@ -1,10 +1,7 @@
 #include "inc/list.h"
 
 // Private structs and definitions:
-
-typedef struct node node_t;
-
-struct node {
+struct node_s {
     node_t* prev;
     node_t* next;
     void* data;
@@ -36,6 +33,7 @@ LIST LIST_create(memoryReleaseFunction_t memoryReleaseFunction, getNameFunction_
         return NULL;
     }
 
+    bool isMemoryAllocatedSuccessfully = false;
     LIST list = NULL;
     list = (list_t*) malloc(sizeof(*list));
     if (NULL == list) {
@@ -55,8 +53,7 @@ LIST LIST_create(memoryReleaseFunction_t memoryReleaseFunction, getNameFunction_
         goto cleanup;
     }
 
-    // CR: (DC) What did I say about obvious comments? Remove all obvious comments
-    // Set list params:
+    isMemoryAllocatedSuccessfully = true;
     list->length = 0;
     list->memoryReleaseFunc = memoryReleaseFunction;
     list->getDataNameFunc = getNameFunction;
@@ -71,81 +68,86 @@ LIST LIST_create(memoryReleaseFunction_t memoryReleaseFunction, getNameFunction_
     list->last->next = NULL;
     list->last->data = NULL;
 
-    // Success!
-    // CR: (DC) As the conventions doc says, if your function needs cleanup, it can only have
-    // CR: (DC) ONE return statement and ONE label. Here you have two labels.
-    // CR: (DC) Remove the exit: label. You will need to know in your cleanup label whether to actually
-    // CR: (DC) do cleanup or not. Remember, if you're facing a programming problem, adding another variable
-    // CR: (DC) will usually solve it.
-    goto exit;
-
 cleanup:
-    // CR: (DC) You can use your LIST_destroy function, that can take a list (even a NULL list)
-    // CR: (DC) and destroy it. Note that your LIST_destroy function can handle half-baked lists (lists
-    // CR: (DC) that weren't fully created)
-    if (NULL != list) {
-        FREE(list->first);
-        FREE(list->last);
+    if (!isMemoryAllocatedSuccessfully) {
+        LIST_destroy(list);
     }
-    FREE(list);
-
-exit:
     return list;
 }
 
 returnCode_t LIST_getLength(LIST list, int* length) {
-    if (NULL == list) {
-        DEBUG_PRINT("LIST given is NULL. Please try again.");
-        return RETURNCODE_LIST_GETLENGTH_LIST_IS_NULL;
+    if ((NULL == list) || (NULL == length)) {
+        DEBUG_PRINT("LIST or pointer to length given are NULL. Please try again.");
+        return RETURNCODE_LIST_GETLENGTH_LIST_OR_LENGTH_POINTER_ARE_NULL;
     }
     *length = list->length;
     return RETURNCODE_SUCCESS;
 }
 
-void* LIST_getFirst(LIST list) {
+node_t* LIST_getFirst(LIST list) {
     if (NULL == list) {
         return NULL;
     }
-
     if (0 == list->length) {
         return NULL;
     }
-
-    return list->first->next->data;
+    return list->first->next;
 }
 
-void* LIST_getLast(LIST list) {
+node_t* LIST_getLast(LIST list) {
     if (NULL == list) {
         return NULL;
-    } else if (0 == list->length) {
+    }
+    if (0 == list->length) {
         return NULL;
     }
-    return list->last->prev->data;
+    return list->last->prev;
 }
 
-returnCode_t LIST_getNext(LIST list, void* pDataCurrent, void** pDataNext) {
-    if (NULL == list) {
-        DEBUG_PRINT("LIST given is NULL. Please try again.");
-        return RETURNCODE_LIST_GETNEXT_LIST_NULL;
+returnCode_t LIST_find(LIST list, void* data, compareFunction_t compareFunction, bool* dataFound, node_t** nodeOfFoundData) {
+    if ((NULL == list) || (NULL == compareFunction) || (NULL == dataFound) || (NULL == nodeOfFoundData)) {
+        DEBUG_PRINT("LIST or one of the other parameters given are NULL. Please try again.");
+        return RETURNCODE_LIST_FIND_PARAMETERS_NULL;
+    }
+    *dataFound = false;
+    *nodeOfFoundData = NULL;
+    node_t* pNodeIterator = NULL;
+    for (pNodeIterator = list->first->next; pNodeIterator != list->last; pNodeIterator = pNodeIterator->next) {
+        if (0 == compareFunction(data, pNodeIterator->data)) {
+            *dataFound = true;
+            *nodeOfFoundData = pNodeIterator;
+            break;
+        }
+    }
+    return RETURNCODE_SUCCESS;
+}
+
+returnCode_t LIST_getNext(LIST list, node_t* currentNode, node_t** nextNode) {
+    if ((NULL == list) || (NULL == currentNode) || (NULL == nextNode)) {
+        DEBUG_PRINT("LIST or pointer to one of the nodes given are NULL. Please try again.");
+        return RETURNCODE_LIST_GETNEXT_LIST_OR_NODE_NULL;
     }
 
-    const node_t* nodeSearcher = list_getNode(list, pDataCurrent);
-
-    // Check if we found element:
-    if (nodeSearcher == list->last) {
-        *pDataNext = NULL;
+    if (currentNode == list->last) {
+        *nextNode = NULL;
         return RETURNCODE_LIST_GETNEXT_CURRENT_ELEMENT_NOT_FOUND;
     }
 
     // Check if the element is last in the list (and thus has no next element):
-    if (nodeSearcher->next == list->last) {
-        *pDataNext = NULL;
+    if (currentNode->next == list->last) {
+        *nextNode = NULL;
         return RETURNCODE_LIST_GETNEXT_LAST_ELEMENT;
     }
 
-    // Set pDataNext to the correct data element pointer:
-    *pDataNext = nodeSearcher->next->data;
+    *nextNode = currentNode->next;
     return RETURNCODE_SUCCESS;
+}
+
+void* LIST_getData(node_t* node) {
+    if (NULL == node) {
+        return NULL;
+    }
+    return  node->data;
 }
 
 returnCode_t LIST_removeElement(LIST list, void* pDataElement) {

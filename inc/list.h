@@ -6,6 +6,7 @@
 #include "inc/common.h"
 
 typedef struct list list_t;
+typedef struct node_s node_t;
 typedef list_t* LIST;
 
 typedef int (*memoryReleaseFunction_t)(void*);
@@ -13,6 +14,8 @@ typedef int (*memoryReleaseFunction_t)(void*);
 typedef char* (*getNameFunction_t)(void*);
 
 typedef void* (*copyFunction_t)(void*);
+
+typedef int (*compareFunction_t)(void*, void*);
 
 /**
  * @brief This function creates a list.
@@ -39,27 +42,46 @@ returnCode_t LIST_getLength(LIST list, int* length);
 /**
  * @brief This function returns a pointer to the first data element in the list.
  * @param list [IN] is a LIST instance to get it's first element.
- * @returns pointer to the first element. If list is NULL or that the list is empty - NULL is returned.
+ * @returns pointer to the node of the first element. If list is NULL or that the list is empty - NULL is returned.
 **/
-void* LIST_getFirst(LIST list);
+node_t* LIST_getFirst(LIST list);
 
 /**
  * @brief This function returns a pointer to the last data element in the list.
  * @param list [IN] is a LIST instance to get it's last element.
- * @returns pointer to the last element. If list is NULL or that the list is empty - NULL is returned.
+ * @returns pointer to the node of the last element. If list is NULL or that the list is empty - NULL is returned.
 **/
-void* LIST_getLast(LIST list);
+node_t* LIST_getLast(LIST list);
 
 /**
- * @brief This function returns a pointer to the next data element of a given element in the list.
- * If the element is not on the list, or the element is the last in the list - an appropriate listReturnCode_t is returned.
+ * @brief This function returns a pointer to the next node of a given node in the list.
+ * If the node is not on the list, or the node is the last in the list - an appropriate listReturnCode_t is returned.
  * @param list [IN] is a LIST instance to get it's next element.
- * @param pDataCurrent [IN] is a pointer to a data element from which we want to get the next data element.
- * @param pDataNext [OUT] is an address of a pointer to the next data element.
- * If the element is either not found or the last element - NULL is set to this pointer's address.
+ * @param currentNode [IN] is a pointer to a node in the list from which we want to get the next node.
+ * @param nextNode [OUT] is an address of a pointer to the next node.
+ * If the node is either not found or the last - NULL is set to this pointer's address.
  * @returns Appropriate listReturnCode_t.
 **/
-returnCode_t LIST_getNext(LIST list, void* pDataCurrent, void** pDataNext);
+returnCode_t LIST_getNext(LIST list, node_t* currentNode, node_t** nextNode);
+
+/**
+ * @brief This function returns the data contained inside a valid list node.
+ * @return Pointer to the data inside the node. If the node pointer is NULL, then NULL is returned.
+ */
+void* LIST_getData(node_t* node);
+
+/**
+ * @brief This function finds out if a specified data element exists in the given list. It uses a compate_t function given by the user to compare
+ * between two data elements.
+ * @param list [IN] The given LIST to search the element in.
+ * @param data [IN] Pointer to the data element that we are looking for.
+ * @param compareFunction [IN] Pointer to a compare function to compare between two data elements. It receives two pointers to the data elements, and returns an integer
+ * that indicates whether they are equal.If they are, it returns 0. Else, it returns another integer. This function has type definition in this very file.
+ * @param dataFound [OUT] Pointer to a boolean output that indicates whether the element found in the list.
+ * @param nodeOfFoundData [OUT] Pointer to store the pointer of the matching node that was found in the list. If no node found, this param will be NULL.
+ * @return Appropriate listReturnCode_t.
+ */
+returnCode_t LIST_find(LIST list, void* data, compareFunction_t compareFunction, bool* dataFound, node_t** nodeOfFoundData);
 
 /**
  * @brief This function removes a specified element from the list.

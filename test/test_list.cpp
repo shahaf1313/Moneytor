@@ -38,6 +38,10 @@ void* copyFunction(void* ptr) {
     return (void*) pNewData;
 }
 
+int nameCompareFunction(void* pFile1, void* pFile2) {
+    return strcmp(((data_t*)pFile1)->name,((data_t*)pFile2)->name);
+}
+
 char* getName(void* pDataVoid) {
     return ((data_t*) pDataVoid)->name;
 }
@@ -57,6 +61,9 @@ void* nullFunction(void* ptr) {
 char* nullNameFunction(void* ptr) {
     return nullptr;
 }
+
+
+
 
 
 using namespace testing;
@@ -91,25 +98,30 @@ TEST(Sample, test_list_dor) {
     list = LIST_create(dummyReleaseFunction, nullNameFunction);
     EXPECT_EQ(LIST_addElement(list, (void*) 10), RETURNCODE_SUCCESS);
     EXPECT_EQ(LIST_print(list), RETURNCODE_SUCCESS);
+
+    // Create a test that calls LIST_getLength(list, NULL)
+    EXPECT_EQ(LIST_getLength(list, NULL), RETURNCODE_LIST_GETLENGTH_LIST_OR_LENGTH_POINTER_ARE_NULL);
+
+    // Create a test that does the following:
+    // 1. Create a list
+    // 2. Insert the value ((void*) 10)
+    // 3. Call LIST_getNext(my_list, ((void*) 10), NULL)
+    EXPECT_EQ(LIST_destroy(list), RETURNCODE_SUCCESS);
+    list = LIST_create(dummyReleaseFunction, dummyNameFunction);
+    EXPECT_NE(nullptr, list);
+    EXPECT_EQ(LIST_addElement(list, (void*) 10), RETURNCODE_SUCCESS);
+    EXPECT_EQ(LIST_getNext(list, ((node_t*) 10), NULL), RETURNCODE_LIST_GETNEXT_LIST_OR_NODE_NULL);
+
     //Destroy lists:
     EXPECT_EQ(LIST_destroy(list), RETURNCODE_SUCCESS);
     EXPECT_EQ(LIST_destroy(copiedList), RETURNCODE_SUCCESS);
-
-
 }
-
-// CR: (DC) Create a test that calls LIST_getLength(list, NULL)
-
-// CR: (DC) Create a test that does the following:
-// CR: (DC) 1. Create a list
-// CR: (DC) 2. Insert the value ((void*) 10)
-// CR: (DC) 3. Call LIST_getNext(my_list, ((void*) 10), NULL)
 
 TEST(Sample, test_list_shahaf) {
     int i, listLength;
     char ch, snum[2];
     snum[1] = '\0';
-    void* dummyPtr;
+    node_t* dummyPtr;
 
     //create list and check:
     LIST list = LIST_create(relMem, getName);
@@ -125,7 +137,7 @@ TEST(Sample, test_list_shahaf) {
     EXPECT_EQ(LIST_getLast(list), nullptr);
 
     //get next element from empty list:
-    EXPECT_EQ(LIST_getNext(list, snum, &dummyPtr), RETURNCODE_LIST_GETNEXT_CURRENT_ELEMENT_NOT_FOUND);
+    EXPECT_EQ(LIST_getNext(list, LIST_getFirst(list), &dummyPtr), RETURNCODE_LIST_GETNEXT_LIST_OR_NODE_NULL);
 
     //try to add null element:
     EXPECT_EQ(LIST_addElement(list, nullptr), RETURNCODE_SUCCESS);
@@ -147,6 +159,19 @@ TEST(Sample, test_list_shahaf) {
     for (i = 0; i < NODES_NUM - 1; i++) {
         EXPECT_EQ(LIST_addElement(list, pDataArr[i]), RETURNCODE_SUCCESS);
     }
+
+    //try to find an existing element:
+    bool found = false;
+    node_t* nodeOfOther = nullptr;
+    EXPECT_EQ(LIST_find(list, LIST_getData(LIST_getFirst(list)), nameCompareFunction, &found, &nodeOfOther), RETURNCODE_SUCCESS);
+    EXPECT_EQ(found, true);
+    EXPECT_NE(nodeOfOther, nullptr);
+
+    //try to find a non existing element:
+    EXPECT_EQ(LIST_find(list, pDataArr[NODES_NUM-1], nameCompareFunction, &found, &nodeOfOther), RETURNCODE_SUCCESS);
+    EXPECT_EQ(found, false);
+    EXPECT_EQ(nodeOfOther, nullptr);
+
 
     //try to print list:
     EXPECT_EQ(LIST_print(list), RETURNCODE_SUCCESS);
